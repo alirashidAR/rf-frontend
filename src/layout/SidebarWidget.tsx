@@ -10,7 +10,7 @@ export default function SidebarWidget() {
         #1 Platform to all your research problems
       </h3>
       <p className="mb-4 text-gray-500 text-theme-sm dark:text-gray-400">
-        Made by : Ali Rashid, Jahnavi Majumder, Khushi Sikaria, Tanisha Pahwa, Keshav Sharma
+        Made by : Ali Rashid, Jahnavi Majumder, Khushi Sikaria, Tanisha Pahwa, Keshav Sharma.
       </p>
       <a
         href="https://tailadmin.com/pricing"
