@@ -21,7 +21,7 @@ export default function SignInForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const idToken = await user.getIdToken();
-      
+      console.log(`googleidToken: ${idToken}`);
       const response = await axios.post(
         "https://rf-backend-alpha.vercel.app/auth/googleLogin",
         {},
@@ -32,6 +32,7 @@ export default function SignInForm() {
         }
       );
       const jwt = response.data.jwt;
+      console.log(`jwt: ${jwt}`);
       localStorage.setItem("jwt", jwt);
       setTimeout(() => {
         window.location.href = "/";
