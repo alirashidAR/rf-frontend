@@ -13,8 +13,6 @@ import axios from "axios";
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  
-  const provider = new GoogleAuthProvider();
 
   const handleGoogleSignIn = async () => {
     try {
