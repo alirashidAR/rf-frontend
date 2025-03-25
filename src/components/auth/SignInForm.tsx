@@ -6,7 +6,7 @@ import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import {signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {signInWithPopup } from "firebase/auth";
 import {auth, provider} from "../../config/firebase";
 import axios from "axios";
 
