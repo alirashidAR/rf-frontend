@@ -5,52 +5,41 @@ import { ArrowDownIcon, ArrowUpIcon, BoxIconLine, GroupIcon } from "@/icons";
 
 export const EcommerceMetrics = () => {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+    <div className="w-full">
       {/* <!-- Metric Item Start --> */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-          <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
-        </div>
+      <div className="w-full rounded-2xl border border-gray-200 bg-white px-5 pb-8 pt-5 dark:border-gray-800 dark:bg-white/[0.03]">
 
-        <div className="flex items-end justify-between mt-5">
-          <div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Customers
-            </span>
-            <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              3,782
-            </h4>
-          </div>
-          <Badge color="success">
-            <ArrowUpIcon />
-            11.01%
-          </Badge>
-        </div>
-      </div>
-      {/* <!-- Metric Item End --> */}
-
-      {/* <!-- Metric Item Start --> */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-          <BoxIconLine className="text-gray-800 dark:text-white/90" />
-        </div>
-        <div className="flex items-end justify-between mt-5">
-          <div>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              Orders
-            </span>
-            <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
-              5,359
-            </h4>
+        <div className="flex items-center justify-between">
+          <div className="w-full">
+            <h3 className="text-3xl font-semibold text-gray-800 dark:text-white/90">
+              Welcome back!
+            </h3>
+            <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
+              Here's what's happening with your research activities 
+            </p>
           </div>
 
-          <Badge color="error">
-            <ArrowDownIcon className="text-error-500" />
-            9.05%
-          </Badge>
+          <div className="flex space-x-8">
+            {/* Active Projects */}
+            <div className="flex flex-col items-center whitespace-nowrap">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Active Projects</span>
+              <h4 className="text-xl font-semibold text-blue-600 dark:text-blue-400">5</h4>
+            </div>
+            
+            {/* Collaborations */}
+            <div className="flex flex-col items-center whitespace-nowrap">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Collaborations</span>
+              <h4 className="text-xl font-semibold text-blue-600 dark:text-blue-400">3</h4>
+            </div>
+
+            {/* Messages */}
+            <div className="flex flex-col items-center whitespace-nowrap mr-4">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Messages</span>
+              <h4 className="text-xl font-semibold text-blue-600 dark:text-blue-400">12</h4>
+            </div>
+          </div>
         </div>
       </div>
-      {/* <!-- Metric Item End --> */}
     </div>
   );
 };
