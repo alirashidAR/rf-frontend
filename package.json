@@ -24,6 +24,7 @@
     "axios": "^1.8.4",
     "firebase": "^11.5.0",
     "flatpickr": "^4.6.13",
+    "lucide-react": "^0.485.0",
     "next": "^15.2.4",
     "react": "^18.3.1",
     "react-apexcharts": "^1.7.0",
@@ -32,6 +33,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.5",
     "react-flatpickr": "^3.10.13",
+    "react-router-dom": "^7.4.1",
     "swiper": "^11.2.0",
     "swr": "^2.3.3",
     "tailwind-merge": "^2.6.0"

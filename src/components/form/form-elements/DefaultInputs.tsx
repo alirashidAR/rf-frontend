@@ -17,7 +17,10 @@ export default function DefaultInputs() {
     console.log("Selected value:", value);
   };
   return (
-    <ComponentCard title="Default Inputs">
+    <ComponentCard title="Create New Research Project">
+      <p className="text-gray-500 dark:text-gray-400 mt-0">
+        Use the form below to create a new research project. Ensure all fields are filled out correctly.
+        </p>
       <div className="space-y-6">
         <div>
           <Label>Input</Label>

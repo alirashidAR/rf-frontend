@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { Bell, Home, MessageSquare } from "lucide-react";
 import {
   BoxCubeIcon,
   CalenderIcon,
@@ -16,6 +17,7 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  BellIcon
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 
@@ -30,13 +32,15 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Portal", path: "/admin", pro: false }],
+    subItems: [{ name: "Portal", path: "/admin", pro: false },
+      { name: "Metrics", path: "/admin", pro: false },
+    ],
   },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
+  // {
+  //   icon: <CalenderIcon />,
+  //   name: "Calendar",
+  //   path: "/calendar",
+  // },
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
@@ -49,54 +53,51 @@ const navItems: NavItem[] = [
   },
 
   {
-    name: "Forms",
+    name: "Create Project",
     icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/admin/others-pages/forms/form-elements", pro: false }],
+    path: "/admin/others-pages/forms/form-elements",
   },
+  // {
+  //   name: "Tables",
+  //   icon: <TableIcon />,
+  //   subItems: [{ name: "Basic Tables", path: "/admin/others-pages/tables/basic-tables", pro: false }],
+  // },
   {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/admin/others-pages/tables/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
+    name: "My Projects",
     icon: <PageIcon />,
-    subItems: [
-      { name: "My Projects", path: "/admin/others-pages/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
+    path: "/admin/others-pages/blank",
   },
 ];
 
 const othersItems: NavItem[] = [
   {
-    icon: <PieChartIcon />,
-    name: "Charts",
+    icon: <Bell className="w-5 h-5" />,
+    name: "Updates",
     subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
+      { name: "Notifications", path: "/admin/notifications", pro: false },
+      { name: "Messages", path: "/admin/messages", pro: false },
     ],
   },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/ui/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
+  // {
+  //   icon: <BoxCubeIcon />,
+  //   name: "UI Elements",
+  //   subItems: [
+  //     { name: "Alerts", path: "/alerts", pro: false },
+  //     { name: "Avatar", path: "/avatars", pro: false },
+  //     { name: "Badge", path: "/ui/badge", pro: false },
+  //     { name: "Buttons", path: "/buttons", pro: false },
+  //     { name: "Images", path: "/images", pro: false },
+  //     { name: "Videos", path: "/videos", pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <PlugInIcon />,
+  //   name: "Authentication",
+  //   subItems: [
+  //     { name: "Sign In", path: "/", pro: false },
+  //     { name: "Sign Up", path: "/signup", pro: false },
+  //   ],
+  // },
 ];
 
 const AppSidebar: React.FC = () => {
