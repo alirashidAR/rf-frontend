@@ -7,7 +7,7 @@ const useGoBack = () => {
     if (window.history.length > 1) {
       router.back(); // Navigate to the previous route
     } else {
-      router.push("/"); // Redirect to home if no history exists
+      router.push("/admin"); // Redirect to home if no history exists
     }
   };
 
