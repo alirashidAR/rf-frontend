@@ -42,6 +42,11 @@ const navItems: NavItem[] = [
     name: "User Profile",
     path: "/admin/others-pages/profile",
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "Faculty Profile",
+    path: "/admin/others-pages/profile-faculty",
+  },
 
   {
     name: "Forms",
