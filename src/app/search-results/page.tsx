@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 
 import ComponentCard from "@/components/common/ComponentCard";
 // Remove the duplicate import and ensure the correct path is used
 const SearchResults = () => {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const router = useRouter();

@@ -33,27 +33,29 @@ const FormElements = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Handle file selection
-  const handleFileChange = (event) => {
-    const files = Array.from(event.target.files);
-    
-    // Filter valid files (max size 10MB, accepted formats)
-    const validFiles = files.filter(file => 
-      file.size <= 10 * 1024 * 1024 && /\.(pdf|doc|docx)$/i.test(file.name)
-    );
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) return; // Ensure files exist before proceeding
 
-    if (validFiles.length !== files.length) {
-      alert("Some files were not added due to size limit (10MB) or invalid format.");
-    }
+  const files = Array.from(event.target.files);
 
-    // Update state to store multiple files
-    setSelectedFiles([...selectedFiles, ...validFiles]);
-  };
+  // Filter valid files (max size 10MB, accepted formats)
+  const validFiles = files.filter(
+    (file) => file.size <= 10 * 1024 * 1024 && /\.(pdf|doc|docx)$/i.test(file.name)
+  );
+
+  if (validFiles.length !== files.length) {
+    alert("Some files were not added due to size limit (10MB) or invalid format.");
+  }
+
+  // Update state correctly using functional update to avoid stale state issues
+  setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
+};
 
   // Remove a file from the list
-  const removeFile = (index) => {
+  const removeFile = (index: number) => {
     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 

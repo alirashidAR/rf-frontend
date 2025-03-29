@@ -33,7 +33,7 @@ export default function MyProjectsPage() {
       <PageBreadcrumb pageTitle="My Projects" />
 
       {/* Component Card to wrap content (without duplicate title) */}
-      <ComponentCard className="mt-4">
+      <ComponentCard title="" className="mt-4">
         {/* Tabs */}
         <div className="flex space-x-6 border-b pb-2">
           {tabs.map((tab) => (
