@@ -92,7 +92,13 @@ const SearchResults = () => {
 
         {/* Render Search Results */}
         {searchResults.map((project) => (
-          <ComponentCard key={project.id} title={project.title} desc={`${project.professor} • ${project.department} Department`} className="mt-4 cursor-pointer hover:bg-gray-100" onClick={() => router.push(`/admin/others-pages/projects/${project.id}`)}>
+          <ComponentCard 
+          key={project.id} 
+          title={project.title} 
+          desc={`${project.professor} • ${project.department} Department`} 
+          className="mt-4 cursor-pointer hover:bg-gray-100" 
+          onClick={() => router.push(`/admin/others-pages/projects/${project.id}`)}
+          >
             <div className="mt-2">
               {project.tags.map((tag) => (
                 <span key={tag} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-2">{tag}</span>
