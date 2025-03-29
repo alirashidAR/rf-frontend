@@ -6,18 +6,12 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { Bell, Home, MessageSquare } from "lucide-react";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
   UserCircleIcon,
-  BellIcon
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 
@@ -51,7 +45,11 @@ const navItems: NavItem[] = [
     name: "Faculty Profile",
     path: "/admin/others-pages/profile-faculty",
   },
-
+  {
+    name : "Faculty Details",
+    icon: <UserCircleIcon />,
+    path: "/admin/others-pages/faculty-detail",
+  },
   {
     name: "Create Project",
     icon: <ListIcon />,
@@ -315,32 +313,15 @@ const AppSidebar: React.FC = () => {
         }`}
       >
         <Link href="/admin">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <Image
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
+  <h2 
+    className={`text-lg font-semibold transition-all duration-300 ${
+      isExpanded || isHovered || isMobileOpen ? "text-blue-600" : "text-gray-800"
+    }`}
+  >
+    Research Faculty Finder
+  </h2>
+</Link>
+
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">

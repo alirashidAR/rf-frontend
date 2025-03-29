@@ -34,6 +34,7 @@
     "react-dropzone": "^14.3.5",
     "react-flatpickr": "^3.10.13",
     "react-router-dom": "^7.4.1",
+    "react-scroll": "^1.9.3",
     "swiper": "^11.2.0",
     "swr": "^2.3.3",
     "tailwind-merge": "^2.6.0"
