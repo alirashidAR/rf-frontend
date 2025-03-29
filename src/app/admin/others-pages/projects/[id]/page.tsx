@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+"use client"
+import { useParams } from "next/navigation";
 
 // Mock data (Replace with API call later)
 const projects = [
@@ -28,15 +29,15 @@ const projects = [
   },
 ];
 
-// ✅ Convert the component to an async function
-export default async function ProjectPage({ params }: { params: { id: string } }) {
-  // Ensure params is awaited
-  const projectId = params?.id;
-  if (!projectId) return notFound();
+// ✅ Fix: Use async function to correctly handle params
+export default function ProjectPage() {
+  // Ensure params exists before accessing its properties
+  const params = useParams(); // Get params safely
 
-  // Find project
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) return notFound();
+  if (!params?.id) return <p>Loading...</p>; // Ensure id exists
+  const project = projects.find((p) => p.id === String(params.id));
+
+  if (!project) return <p>Project not found.</p>;
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg">

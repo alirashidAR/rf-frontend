@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 
 import ComponentCard from "@/components/common/ComponentCard";
 // Remove the duplicate import and ensure the correct path is used
 const SearchResults = () => {
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const router = useRouter();
@@ -92,7 +92,13 @@ const SearchResults = () => {
 
         {/* Render Search Results */}
         {searchResults.map((project) => (
-          <ComponentCard key={project.id} title={project.title} desc={`${project.professor} • ${project.department} Department`} className="mt-4 cursor-pointer hover:bg-gray-100" onClick={() => router.push(`/admin/others-pages/projects/${project.id}`)}>
+          <ComponentCard 
+          key={project.id} 
+          title={project.title} 
+          desc={`${project.professor} • ${project.department} Department`} 
+          className="mt-4 cursor-pointer hover:bg-gray-100" 
+          onClick={() => router.push(`/admin/others-pages/projects/${project.id}`)}
+          >
             <div className="mt-2">
               {project.tags.map((tag) => (
                 <span key={tag} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-2">{tag}</span>

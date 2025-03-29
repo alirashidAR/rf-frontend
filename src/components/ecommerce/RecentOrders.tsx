@@ -17,7 +17,7 @@ interface Product {
   price: string; // Price of the product (as a string with currency symbol)
   // status: string; // Status of the product
   image: string; // URL or path to the product image
-  status: "Delivered" | "Pending" | "Canceled"; // Status of the product
+  status: "Delivered" | "Pending" | "Canceled"|"-"; // Status of the product
 }
 
 // Define the table data using the interface
