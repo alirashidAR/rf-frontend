@@ -53,7 +53,7 @@
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
   },
-  "description": "TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.",
+  "description": "Research Faculty Finder for VIT University, Vellore, India. This is a Next.js based web application that provides a dashboard for managing and displaying information related to research faculty members.",
   "main": "postcss.config.js",
   "repository": {
     "type": "git",

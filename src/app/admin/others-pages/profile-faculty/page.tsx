@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import React from "react"; // Ensure React is imported for JSX
 
 export const metadata: Metadata = {
-  title: "Faculty Profile | TailAdmin - Next.js Dashboard",
+  title: "Faculty Profile",
   description: "Faculty profile page with detailed information and metadata.",
 };
 
