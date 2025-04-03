@@ -9,12 +9,21 @@ import React, { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../config/firebase";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 
 export default function SignInForm() {
+  // const [showPassword, setShowPassword] = useState(false);
+  // const [email, setEmail] = useState<string>("");
+  // const [password, setPassword] = useState<string>("");
+  // const [isChecked, setIsChecked] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
   const [isChecked, setIsChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -31,34 +40,75 @@ export default function SignInForm() {
           },
         }
       );
-      const jwt = response.data.jwt;
-      console.log(`jwt: ${jwt}`);
+      const { jwt, role } = response.data; // Get role from backend response
+      console.log(`jwt: ${jwt}, role: ${role}`);
       localStorage.setItem("jwt", jwt);
-      setTimeout(() => {
-        window.location.href = "/admin";
-      }, 0);
+      if (role === "FACULTY") {
+        window.location.href = "/admin/faculty";
+      } else {
+        window.location.href = "/admin/student";
+      }
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
   };
 
-  const handleSignin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSignin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     console.log(`email: ${email}`);
+  //     console.log(`password: ${password}`);
+  //     const response = await axios.post(
+  //       "https://rf-backend-alpha.vercel.app/auth/login",
+  //       { email, password }
+  //     );
+  //     const jwt = response.data.jwt;
+  //     console.log(`jwt: ${jwt}`);
+  //     localStorage.setItem("jwt", jwt);
+  //     setTimeout(() => {
+  //       window.location.href = "/admin";
+  //     }, 0);
+  //   } catch (error) {
+  //     console.error("Login Error:", error);
+  //   }
+  // };
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+
     try {
-      console.log(`email: ${email}`);
-      console.log(`password: ${password}`);
-      const response = await axios.post(
-        "https://rf-backend-alpha.vercel.app/auth/login",
-        { email, password }
-      );
-      const jwt = response.data.jwt;
-      console.log(`jwt: ${jwt}`);
-      localStorage.setItem("jwt", jwt);
-      setTimeout(() => {
-        window.location.href = "/admin";
-      }, 0);
+      const response = await fetch("https://rf-backend-alpha.vercel.app/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save JWT token
+        localStorage.setItem("token", data.jwt);
+
+        // Decode token to get role
+        const decodedToken: any = jwtDecode(data.jwt);
+        console.log("Decoded Token:", decodedToken); // Debugging
+
+        // Redirect based on role
+        if (decodedToken.role === "USER") {
+          router.push("/admin/student");
+        } else if (decodedToken.role === "FACULTY") {
+          router.push("/admin/faculty");
+        } else {
+          console.error("Unknown role:", decodedToken.role);
+        }
+      } else {
+        alert(data.message); // Show error message
+      }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,7 +181,7 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form onSubmit={handleSignin}>
+            <form onSubmit={handleLogin}>
               <div className="space-y-6">
                 <div>
                   <Label>

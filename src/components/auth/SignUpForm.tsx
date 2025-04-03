@@ -6,32 +6,75 @@ import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
-import { Router } from "lucide-react";
 
 export default function SignUpForm() {
-  const [showPassword, setShowPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  // const [fname, setFname] = useState("");
+  // const [lname, setLname] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const name = fname + " " + lname;
+  //   const formData = { name, email, password };
+
+  //   try {
+  //     const response = await axios.post("https://rf-backend-alpha.vercel.app/auth/register", formData, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     console.log("Success:", response.data);
+  //     window.location.href = "/"; // Redirect to sign-in page after successful registration
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const name = fname + " " + lname;
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const name = `${fname} ${lname}`;
     const formData = { name, email, password };
 
     try {
       const response = await axios.post("https://rf-backend-alpha.vercel.app/auth/register", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       console.log("Success:", response.data);
-      window.location.href = "/"; // Redirect to sign-in page after successful registration
-    } catch (error) {
-      console.error("Error:", error);
+      setSuccessMessage("Signup successful! Redirecting to login...");
+
+      setTimeout(() => {
+        window.location.href = "/"; // Redirect to login page
+      }, 2000);
+    } catch (error: any) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          setErrorMessage("Email and password are required.");
+        } else if (error.response.status === 403) {
+          setErrorMessage("Only VIT Faculty and Students can register.");
+        } else if (error.response.status === 409) {
+          setErrorMessage("Email already exists. Please log in.");
+        } else {
+          setErrorMessage("Signup failed. Please try again.");
+        }
+      } else {
+        setErrorMessage("Network error. Please check your connection.");
+      }
     }
   };
 
