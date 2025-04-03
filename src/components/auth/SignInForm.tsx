@@ -73,6 +73,14 @@ export default function SignInForm() {
   //   }
   // };
 
+  interface DecodedToken {
+    id: string;
+    email: string;
+    role: "USER" | "FACULTY"; // Ensure strict typing for roles
+    iat: number;
+    exp: number;
+  }
+
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
@@ -91,8 +99,15 @@ export default function SignInForm() {
         localStorage.setItem("token", data.jwt);
 
         // Decode token to get role
-        const decodedToken: any = jwtDecode(data.jwt);
+        const decodedToken: DecodedToken = jwtDecode(data.jwt);
         console.log("Decoded Token:", decodedToken); // Debugging
+
+        const currentTime = Date.now() / 1000; // Convert to seconds
+        if (decodedToken.exp < currentTime) {
+          console.error("Token has expired");
+          alert("Session expired. Please log in again.");
+          return;
+        }
 
         // Redirect based on role
         if (decodedToken.role === "USER") {

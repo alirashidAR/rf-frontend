@@ -6,6 +6,7 @@ import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
+import { AxiosError } from "axios";
 
 export default function SignUpForm() {
   // const [showPassword, setShowPassword] = useState(false);
@@ -61,13 +62,14 @@ export default function SignUpForm() {
       setTimeout(() => {
         window.location.href = "/"; // Redirect to login page
       }, 2000);
-    } catch (error: any) {
-      if (error.response) {
-        if (error.response.status === 400) {
+    } catch (error) {
+      const axiosError=error as AxiosError;
+      if (axiosError.response) {
+        if (axiosError.response.status === 400) {
           setErrorMessage("Email and password are required.");
-        } else if (error.response.status === 403) {
+        } else if (axiosError.response.status === 403) {
           setErrorMessage("Only VIT Faculty and Students can register.");
-        } else if (error.response.status === 409) {
+        } else if (axiosError.response.status === 409) {
           setErrorMessage("Email already exists. Please log in.");
         } else {
           setErrorMessage("Signup failed. Please try again.");
