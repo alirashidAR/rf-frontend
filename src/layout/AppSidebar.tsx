@@ -22,50 +22,6 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Portal", path: "/admin", pro: false },
-      { name: "Metrics", path: "/admin", pro: false },
-    ],
-  },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/admin/others-pages/profile",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Faculty Profile",
-    path: "/admin/others-pages/profile-faculty",
-  },
-  {
-    name : "Faculty Details",
-    icon: <UserCircleIcon />,
-    path: "/admin/others-pages/faculty-detail",
-  },
-  {
-    name: "Create Project",
-    icon: <ListIcon />,
-    path: "/admin/others-pages/forms/form-elements",
-  },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/admin/others-pages/tables/basic-tables", pro: false }],
-  // },
-  {
-    name: "My Projects",
-    icon: <PageIcon />,
-    path: "/admin/others-pages/blank",
-  },
-];
 
 const othersItems: NavItem[] = [
   {
@@ -101,6 +57,53 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
+
+  const role=typeof window !== 'undefined' ? localStorage.getItem('role')|| "guest" : null;
+
+  const navItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: "Dashboard",
+      subItems: [{ name: "Portal", path: `/admin/${role}`, pro: false },
+        { name: "Metrics", path: `/admin/${role}`, pro: false },
+      ],
+    },
+    // {
+    //   icon: <CalenderIcon />,
+    //   name: "Calendar",
+    //   path: "/calendar",
+    // },
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: `/admin/${role}/others-pages/profile`,
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "Faculty Profile",
+      path: `/admin/${role}/others-pages/profile-faculty`,
+    },
+    {
+      name : "Faculty Details",
+      icon: <UserCircleIcon />,
+      path: `/admin/${role}/others-pages/faculty-detail`,
+    },
+    {
+      name: "Create Project",
+      icon: <ListIcon />,
+      path: `/admin/${role}/others-pages/forms/form-elements`,
+    },
+    // {
+    //   name: "Tables",
+    //   icon: <TableIcon />,
+    //   subItems: [{ name: "Basic Tables", path: "/admin/others-pages/tables/basic-tables", pro: false }],
+    // },
+    {
+      name: "My Projects",
+      icon: <PageIcon />,
+      path: `/admin/${role}/others-pages/blank`,
+    },
+  ];
 
   const renderMenuItems = (
     navItems: NavItem[],
@@ -312,7 +315,7 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/admin">
+        <Link href={`/admin/${role}`}>
   <h2 
     className={`text-lg font-semibold transition-all duration-300 ${
       isExpanded || isHovered || isMobileOpen ? "text-blue-600" : "text-gray-800"

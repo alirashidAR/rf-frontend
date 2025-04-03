@@ -102,6 +102,8 @@ export default function SignInForm() {
         const decodedToken: DecodedToken = jwtDecode(data.jwt);
         console.log("Decoded Token:", decodedToken); // Debugging
 
+        localStorage.setItem("role", decodedToken.role);
+
         const currentTime = Date.now() / 1000; // Convert to seconds
         if (decodedToken.exp < currentTime) {
           console.error("Token has expired");
@@ -111,9 +113,9 @@ export default function SignInForm() {
 
         // Redirect based on role
         if (decodedToken.role === "USER") {
-          router.push("/admin/student");
+          router.push("/admin/USER");
         } else if (decodedToken.role === "FACULTY") {
-          router.push("/admin/faculty");
+          router.push("/admin/FACULTY");
         } else {
           console.error("Unknown role:", decodedToken.role);
         }
