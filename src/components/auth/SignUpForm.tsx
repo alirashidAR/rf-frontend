@@ -7,6 +7,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import axios from "axios";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignUpForm() {
   // const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +25,7 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
 
   // const handleSubmit = async (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -49,6 +52,7 @@ export default function SignUpForm() {
     setSuccessMessage("");
 
     const name = `${fname} ${lname}`;
+    const role = email.endsWith("@vitstudent.ac.in") ? "USER" : "FACULTY";
     const formData = { name, email, password };
 
     try {
@@ -58,6 +62,7 @@ export default function SignUpForm() {
 
       console.log("Success:", response.data);
       setSuccessMessage("Signup successful! Redirecting to login...");
+
 
       setTimeout(() => {
         window.location.href = "/"; // Redirect to login page

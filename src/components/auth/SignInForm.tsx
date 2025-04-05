@@ -11,8 +11,10 @@ import { auth, provider } from "../../config/firebase";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignInForm() {
+  const { setName,setRole } = useAuth();
   // const [showPassword, setShowPassword] = useState(false);
   // const [email, setEmail] = useState<string>("");
   // const [password, setPassword] = useState<string>("");
@@ -24,6 +26,16 @@ export default function SignInForm() {
   const [isChecked, setIsChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [name] = useState(""); // Add state for name
+
+  interface DecodedToken {
+    id: string;
+    email: string;
+    role: "USER" | "FACULTY"; // Ensure strict typing for roles
+    iat: number;
+    exp: number;
+    name: string;
+  }
 
   const handleGoogleSignIn = async () => {
     try {
@@ -73,15 +85,10 @@ export default function SignInForm() {
   //   }
   // };
 
-  interface DecodedToken {
-    id: string;
-    email: string;
-    role: "USER" | "FACULTY"; // Ensure strict typing for roles
-    iat: number;
-    exp: number;
-  }
+  
 
   const handleLogin = async (event: React.FormEvent) => {
+    
     event.preventDefault();
     setLoading(true);
 
@@ -96,6 +103,7 @@ export default function SignInForm() {
 
       if (response.ok) {
         // Save JWT token
+        //localStorage.clear(); // Clear previous data
         localStorage.setItem("token", data.jwt);
 
         // Decode token to get role
@@ -103,6 +111,9 @@ export default function SignInForm() {
         console.log("Decoded Token:", decodedToken); // Debugging
 
         localStorage.setItem("role", decodedToken.role);
+        localStorage.setItem("name", decodedToken.name); // NEW
+        setRole(decodedToken.role);
+        setName(decodedToken.name);
 
         const currentTime = Date.now() / 1000; // Convert to seconds
         if (decodedToken.exp < currentTime) {
@@ -110,6 +121,7 @@ export default function SignInForm() {
           alert("Session expired. Please log in again.");
           return;
         }
+
 
         // Redirect based on role
         if (decodedToken.role === "USER") {

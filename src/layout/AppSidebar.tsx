@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import { Bell, Home, MessageSquare } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import {
   ChevronDownIcon,
   GridIcon,
@@ -57,8 +58,9 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
+  const { role } = useAuth();
 
-  const role=typeof window !== 'undefined' ? localStorage.getItem('role')|| "guest" : null;
+  //const role=typeof window !== 'undefined' ? localStorage.getItem('role')|| "guest" : null;
 
   const navItems: NavItem[] = [
     {
@@ -80,14 +82,14 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <UserCircleIcon />,
-      name: "Faculty Profile",
+      name: "Browse Faculties",
       path: `/admin/${role}/others-pages/profile-faculty`,
     },
-    {
-      name : "Faculty Details",
-      icon: <UserCircleIcon />,
-      path: `/admin/${role}/others-pages/faculty-detail`,
-    },
+    // {
+    //   name : "Faculty Details",
+    //   icon: <UserCircleIcon />,
+    //   path: `/admin/${role}/others-pages/faculty-detail`,
+    // },
     {
       name: "Create Project",
       icon: <ListIcon />,
