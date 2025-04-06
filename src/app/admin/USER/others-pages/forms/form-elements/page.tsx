@@ -67,7 +67,7 @@ const FormElements = () => {
       console.log("Draft saved to localStorage:", formData);
       // Send data to the server
       const response = await axios.post(
-        "https://rf-backend-alpha.vercel.app/api/projects/create", // Use environment variable
+        "https://rf-backend-alpha.vercel.app/project/create", // Use environment variable
         formData,
         {
           headers: {
