@@ -18,6 +18,7 @@ const eslintConfig = [
       "react-hooks/exhaustive-deps": "off",
       "no-console": "off",
       "no-unused-vars": "off",
+      '@typescript-eslint/no-explicit-any': 'off'
     },
   },
 ];
