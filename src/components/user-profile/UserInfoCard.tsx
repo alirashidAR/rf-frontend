@@ -1,69 +1,120 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-export default function UserInfoCard() {
+export default function UserInfoCard({ data }: any) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+
+  const [name, setName] = useState(data?.title || "");
+  const [email, setEmail] = useState(data?.contactInfo || "");
+  const [bio, setBio] = useState(data?.bio || "");
+  const [specialization, setSpecialization] = useState(
+    data?.specialization?.join(", ") || ""
+  );
+  const [researchAreas, setResearchAreas] = useState(
+    data?.researchAreas?.filter(Boolean).join(", ") || ""
+  );
+  const [officeHours, setOfficeHours] = useState(data?.officeHours || "");
+
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const decodedToken: any = jwtDecode(token);
+      const updatedData = {
+        title: name,
+        contactInfo: email,
+        bio,
+        specialization: specialization.split(",").map((s: string) => s.trim()),
+        researchAreas: researchAreas.split(",").map((r: string) => r.trim()),
+        officeHours,
+      };
+
+      await axios.patch(
+        `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Saved successfully");
+      closeModal();
+    } catch (err) {
+      console.error("Failed to save", err);
+    }
   };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+            Faculty Information
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                StudentA
+                {data?.title || "N/A"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                Email Address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Kumar
+                {data?.contactInfo || "N/A"}
               </p>
             </div>
 
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                student@vitstudent.ac.in
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +91 9899999999
-              </p>
-            </div>
-
-            <div>
+            <div className="lg:col-span-2">
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Bio
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                3rd year Student at VIT University
+                {data?.bio || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Specialization
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {data?.specialization?.join(", ") || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Research Areas
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {(data?.researchAreas?.filter(Boolean).join(", ")) || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Office Hours
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {data?.officeHours || "N/A"}
               </p>
             </div>
           </div>
@@ -104,72 +155,47 @@ export default function UserInfoCard() {
           </div>
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                <div className="col-span-2 lg:col-span-1">
+                  <Label>Name</Label>
+                  <Input type="text" defaultValue={name} onChange={(e) => setName(e.target.value)} />
                 </div>
-              </div>
-              <div className="mt-7">
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
-                </h5>
 
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
-                  </div>
+                <div className="col-span-2 lg:col-span-1">
+                  <Label>Email Address</Label>
+                  <Input type="text" defaultValue={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Bio</Label>
+                  <Input type="text" defaultValue={bio} onChange={(e) => setBio(e.target.value)} />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Specialization</Label>
+                  <Input
+                    type="text"
+                    defaultValue={specialization}
+                    onChange={(e) => setSpecialization(e.target.value)}
+                  />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Research Areas</Label>
+                  <Input
+                    type="text"
+                    defaultValue={researchAreas}
+                    onChange={(e) => setResearchAreas(e.target.value)}
+                  />
+                </div>
 
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Office Hours</Label>
+                  <Input
+                    type="text"
+                    defaultValue={officeHours}
+                    onChange={(e) => setOfficeHours(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
