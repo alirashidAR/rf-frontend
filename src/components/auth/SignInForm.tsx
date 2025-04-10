@@ -55,8 +55,10 @@ export default function SignInForm() {
       const { jwt, role } = response.data; // Get role from backend response
       console.log(`jwt: ${jwt}, role: ${role}`);
       localStorage.setItem("jwt", jwt);
+      
       if (role === "FACULTY") {
         window.location.href = "/admin/faculty";
+        localStorage.setItem("facultyId", response.data.facultyId);
       } else {
         window.location.href = "/admin/student";
       }

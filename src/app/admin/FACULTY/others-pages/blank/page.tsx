@@ -31,7 +31,7 @@ export default function MyProjectsPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("https://rf-backend-alpha.vercel.app/project/getFacultyProjects", {
+        const res = await axios.get("https://rf-backend-alpha.vercel.app/api/search/projects", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

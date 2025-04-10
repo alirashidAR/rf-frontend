@@ -1,58 +1,72 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter,useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 
 import ComponentCard from "@/components/common/ComponentCard";
+import axios from "axios";
 // Remove the duplicate import and ensure the correct path is used
 const SearchResults = () => {
-  // const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
+  //const [query, setQuery] = useState("");
   const router = useRouter();
-
-  const handleSearch = () => {
-    if (query.trim() !== "") {
-      router.push(`/search-results?query=${encodeURIComponent(query)}`);
-    }
-  };
+  // const [searchResults, setSearchResults] = useState([]);
+  // const [type, setType] = useState<string[]>([]);
+  // const [status, setStatus] = useState<string[]>([]);
+  // const [department, setDepartment] = useState<string | null>(null);
+  // const [page, setPage] = useState(1);
+  // const pageSize = 10;
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    query: searchParams.get("query") || "",
+    department: "",
+    status: "",
+    type: "",
+    page: 1,
+    pageSize: 10,
+  });
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-        event.preventDefault();
-        inputRef.current?.focus();
-      }
-      if (event.key === "Enter" && document.activeElement === inputRef.current) {
-        event.preventDefault();
-        handleSearch();
+    const fetchResults = async () => {
+      if (!filters.query) return;
+
+      setLoading(true);
+      try {
+        const res = await axios.post("https://rf-backend-alpha.vercel.app/api/search/projects", {
+          ...filters,
+        });
+
+        setResults(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch search results", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [query]);
+    fetchResults();
+  }, [filters.query]);
 
-  // Dummy search results (Replace with API data)
-  const searchResults = [
-    {
-      id: 1,
-      title: "AI-Powered Medical Diagnosis Systems",
-      professor: "Prof. Sarah Johnson",
-      department: "Computer Science",
-      tags: ["Machine Learning", "Healthcare"],
-      description: "Research project focusing on developing AI algorithms for early disease detection...",
-    },
-    {
-      id: 2,
-      title: "Sustainable Energy Solutions",
-      professor: "Prof. Michael Chen",
-      department: "Engineering",
-      tags: ["Renewable Energy", "Sustainability"],
-      description: "Research project exploring innovative approaches to renewable energy storage...",
-    },
-  ];
+  // useEffect(() => {
+  //   const handleKeyDown = (event: KeyboardEvent) => {
+  //     if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+  //       event.preventDefault();
+  //       inputRef.current?.focus();
+  //     }
+  //     if (event.key === "Enter" && document.activeElement === inputRef.current) {
+  //       event.preventDefault();
+  //       handleSearch();
+  //     }
+  //   };
+
+  //   document.addEventListener("keydown", handleKeyDown);
+  //   return () => document.removeEventListener("keydown", handleKeyDown);
+  // }, [query]);
+
+
 
   return (
     <div className="flex gap-6 p-6 min-h-screen bg-gray-100">
@@ -85,37 +99,34 @@ const SearchResults = () => {
       </ComponentCard>
 
       {/* Search Results Section */}
-      <ComponentCard title={`Search Results (${searchResults.length})`} className="w-3/4 shadow-md">
-        {/* <div className="flex justify-between items-center">
-          <button className="bg-gray-200 p-2 rounded">Sort by: Relevance</button>
-        </div> */}
-
-        {/* Render Search Results */}
-        {searchResults.map((project) => (
-          <ComponentCard 
-          key={project.id} 
-          title={project.title} 
-          desc={`${project.professor} • ${project.department} Department`} 
-          className="mt-4 cursor-pointer hover:bg-gray-100" 
-          onClick={() => router.push(`/admin/others-pages/projects/${project.id}`)}
-          >
-            <div className="mt-2">
-              {project.tags.map((tag) => (
-                <span key={tag} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-2">{tag}</span>
-              ))}
-            </div>
-            <p className="mt-2 text-gray-700">{project.description}</p>
-          </ComponentCard>
-        ))}
-
-        {/* Pagination */}
-        <div className="flex justify-center mt-6">
-          <button className="px-3 py-1 border rounded-l">Previous</button>
-          <button className="px-3 py-1 bg-blue-500 text-white">1</button>
-          <button className="px-3 py-1 border">2</button>
-          <button className="px-3 py-1 border">3</button>
-          <button className="px-3 py-1 border rounded-r">Next</button>
-        </div>
+      <ComponentCard title={`Search Results (${results.length})`} className="w-3/4 shadow-md">
+        {loading ? (
+          <p>Loading...</p>
+        ) : results.length === 0 ? (
+          <p>No results found.</p>
+        ) : (
+          results.map((project, index) => (
+            <ComponentCard
+              key={index}
+              title={project.title || "Untitled Project"}
+              desc={`${project.facultyName || "Unknown"} • ${project.department || "N/A"} Department`}
+              className="mt-4 cursor-pointer hover:bg-gray-100"
+              onClick={() => router.push(`/admin/others-pages/projects/${project.id || ""}`)}
+            >
+              <div className="mt-2">
+                {(project.tags || []).map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-2"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-2 text-gray-700">{project.description}</p>
+            </ComponentCard>
+          ))
+        )}
       </ComponentCard>
     </div>
   );

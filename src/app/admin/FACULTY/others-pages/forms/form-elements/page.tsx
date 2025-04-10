@@ -3,16 +3,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ComponentCard from "@/components/common/ComponentCard";
+import { useAuth } from "@/context/AuthContext";
 
-// interface FormData {
-//   title: string;
-//   description: string;
-//   keywords: string[]; // Change keywords to an array
-//   type: "RESEARCH" | "INDUSTRY" | ""; // Enum for project type
-//   startDate: string;
-//   endDate: string;
-//   status: "ONGOING" | "COMPLETED" | "PAUSED"; // Enum for status
-// }
 
 interface FormData {
   title: string;
@@ -28,19 +20,11 @@ interface FormData {
   status: "ONGOING" | "COMPLETED" | "PENDING";
 }
 
+
+
 const FormElements = () => {
   const router = useRouter();
-
-  // Initialize form state
-  // const [formData, setFormData] = useState<FormData>({
-  //   title: "",
-  //   description: "",
-  //   keywords: [], // Initialize as an empty array
-  //   type: "",
-  //   startDate: "",
-  //   endDate: "",
-  //   status: "ONGOING",
-  // });
+  const { facultyId } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
     title: "",
@@ -55,6 +39,26 @@ const FormElements = () => {
     requirements: [],
     status: "ONGOING",
   });
+
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
+  const validateForm = (): boolean => {
+    const errors: { [key: string]: string } = {};
+
+    if (!formData.title.trim()) errors.title = "Project title is required.";
+    if (!formData.description.trim()) errors.description = "Description is required.";
+    if (!formData.keywords.length) errors.keywords = "At least one keyword is required.";
+    if (!formData.type) errors.type = "Select a valid project type.";
+    if (!formData.startDate) errors.startDate = "Start date is required.";
+    if (!formData.endDate) errors.endDate = "End date is required.";
+    if (!formData.applicationDeadline) errors.applicationDeadline = "Application deadline is required.";
+    if (formData.positionsAvailable <= 0) errors.positionsAvailable = "Must be at least 1 position.";
+    if (!formData.location) errors.location = "Select a location.";
+    if (!formData.requirements.length) errors.requirements = "Enter at least one requirement.";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   
 
   // Handle input changes
@@ -63,10 +67,15 @@ const FormElements = () => {
   ) => {
     const { name, value } = e.target;
 
+    const isDateField = ["startDate", "endDate", "applicationDeadline"].includes(name);
+    const formattedValue = isDateField ? new Date(value).toISOString() : value;
+  
     if (name === "keywords") {
-      setFormData({ ...formData, keywords: value.split(",").map((kw) => kw.trim()) }); // Split and trim keywords
+      setFormData({ ...formData, keywords: value.split(",").map((kw) => kw.trim()) });
+    } else if (name === "positionsAvailable") {
+      setFormData({ ...formData, positionsAvailable: Number(value) });
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({ ...formData, [name]: formattedValue  });
     }
   };
 
@@ -96,7 +105,7 @@ const FormElements = () => {
       console.log("Draft saved to localStorage:", formData);
       // Send data to the server
       const response = await axios.post(
-        "https://rf-backend-alpha.vercel.app/projects/create", // Use environment variable
+        "https://rf-backend-alpha.vercel.app/api/projects/create", // Use environment variable
         formData,
         {
           headers: {
@@ -115,14 +124,20 @@ const FormElements = () => {
   };
 
   const handlePublishProject = async () => {
+    if (!validateForm()) {
+      console.warn("Form has validation errors.");
+      return;
+    }
     try {
+      console.log(localStorage.getItem("token"));
+      
       const response = await axios.post(
-        "https://rf-backend-alpha.vercel.app/project/create",
+        "https://rf-backend-alpha.vercel.app/api/projects/create",
         formData,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
