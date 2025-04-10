@@ -20,7 +20,19 @@ interface FormData {
   status: "ONGOING" | "COMPLETED" | "PENDING";
 }
 
+const formatToDateTimeLocal = (isoString: string) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().slice(0, 16);
+};
 
+const formatToISOString = (localString: string) => {
+  if (!localString) return "";
+  const date = new Date(localString);
+  return date.toISOString();
+};
 
 const FormElements = () => {
   const router = useRouter();
@@ -142,7 +154,7 @@ const FormElements = () => {
         }
       );
       console.log("Project published successfully:", response.data);
-      router.push("admin/FACULTY/others-pages/blank"); // Redirect after successful publish
+      router.push("/admin/FACULTY/others-pages/blank"); // Redirect after successful publish
     } catch (error) {
       console.error("Error publishing project:", error);
     }
@@ -221,7 +233,7 @@ const FormElements = () => {
               <input
                 type="datetime-local"
                 name="startDate"
-                value={formData.startDate || undefined}
+                value={formatToDateTimeLocal(formData.startDate)}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded"
               />
@@ -233,7 +245,7 @@ const FormElements = () => {
               <input
                 type="datetime-local"
                 name="endDate"
-                value={formData.endDate || undefined}
+                value={formatToDateTimeLocal(formData.endDate)}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded"
               />
@@ -250,7 +262,7 @@ const FormElements = () => {
               <input
                 type="datetime-local"
                 name="applicationDeadline"
-                value={formData.applicationDeadline || ""}
+                value={formatToDateTimeLocal(formData.applicationDeadline)}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded"
               />
