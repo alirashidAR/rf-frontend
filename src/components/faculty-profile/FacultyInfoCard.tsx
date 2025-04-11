@@ -19,7 +19,7 @@ export default function FacultyListPage({ data }: any) {
     setSelectedFaculty(null);
   };
 
-  const filteredFaculty = data.filter((faculty:any) => {
+  const filteredFaculty = (data || []).filter((faculty:any) => {
     const search = searchTerm.toLowerCase();
     return (
       faculty.title?.toLowerCase().includes(search) ||
