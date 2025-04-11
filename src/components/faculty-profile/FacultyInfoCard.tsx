@@ -4,7 +4,7 @@ import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "../form/input/InputField";
 
-export default function FacultyListPage({ data }: { data: any[] }) {
+export default function FacultyListPage({ data }: any) {
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
