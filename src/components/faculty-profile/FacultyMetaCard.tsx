@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-export default function Footer() {
+export default function Footer({data}: any) {
   return (
     <footer className="w-full border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-4 flex flex-col items-center md:flex-row md:justify-between">
