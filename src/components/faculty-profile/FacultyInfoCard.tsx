@@ -19,7 +19,7 @@ export default function FacultyListPage({ data }: any) {
     setSelectedFaculty(null);
   };
 
-  const filteredFaculty = data.filter((faculty) => {
+  const filteredFaculty = data.filter((faculty:any) => {
     const search = searchTerm.toLowerCase();
     return (
       faculty.title?.toLowerCase().includes(search) ||
@@ -43,7 +43,7 @@ export default function FacultyListPage({ data }: any) {
       />
 
       <div className="space-y-4">
-        {filteredFaculty.map((faculty) => (
+        {filteredFaculty.map((faculty:any) => (
           <div
             key={faculty.id}
             className="p-4 border border-gray-200 rounded-xl dark:border-gray-700 bg-white dark:bg-gray-900"
