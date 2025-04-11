@@ -13,7 +13,7 @@ export default function UserMetaCard({ data }: any) {
   const { isOpen, openModal, closeModal } = useModal();
 
   const [formData, setFormData] = useState({
-    name: data?.title || "",
+    name: data?.user.name || "",
     email: data?.contactInfo || "",
     phone: data?.phone || "",
     place: data?.location || "",

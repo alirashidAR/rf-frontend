@@ -8,37 +8,50 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-export default function UserInfoCard({ data }: any) {
+export default function UserInfoCard({ data: initialData }: any) {
   const { isOpen, openModal, closeModal } = useModal();
+  
+  // Keep a local copy of data that we can update after successful save
+  const [data, setData] = useState(initialData);
+  
+  const [formData, setFormData] = useState({
+    name: data?.user.name || "",
+    email: data?.contactInfo || "",
+    bio: data?.bio || "",
+    specialization: data?.specialization?.join(", ") || "",
+    researchAreas: data?.researchAreas?.filter(Boolean).join(", ") || "",
+    officeHours: data?.officeHours || ""
+  });
+  
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [name, setName] = useState(data?.title || "");
-  const [email, setEmail] = useState(data?.contactInfo || "");
-  const [bio, setBio] = useState(data?.bio || "");
-  const [specialization, setSpecialization] = useState(
-    data?.specialization?.join(", ") || ""
-  );
-  const [researchAreas, setResearchAreas] = useState(
-    data?.researchAreas?.filter(Boolean).join(", ") || ""
-  );
-  const [officeHours, setOfficeHours] = useState(data?.officeHours || "");
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
       }
       const decodedToken: any = jwtDecode(token);
+      
       const updatedData = {
-        title: name,
-        contactInfo: email,
-        bio,
-        specialization: specialization.split(",").map((s: string) => s.trim()),
-        researchAreas: researchAreas.split(",").map((r: string) => r.trim()),
-        officeHours,
+        name: formData.name,
+        contactInfo: formData.email,
+        bio: formData.bio,
+        specialization: formData.specialization.split(",").map((s: string) => s.trim()),
+        researchAreas: formData.researchAreas.split(",").map((r: string) => r.trim()),
+        officeHours: formData.officeHours,
       };
-
-      await axios.patch(
+      
+      const response = await axios.patch(
         `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
         updatedData,
         {
@@ -48,10 +61,26 @@ export default function UserInfoCard({ data }: any) {
           },
         }
       );
+      
       console.log("Saved successfully");
+      
+      // Update the local data state to reflect changes
+      const updatedUserData = {
+        ...data,
+        user: { ...data.user, name: formData.name },
+        contactInfo: formData.email,
+        bio: formData.bio,
+        specialization: updatedData.specialization,
+        researchAreas: updatedData.researchAreas,
+        officeHours: formData.officeHours
+      };
+      
+      setData(updatedUserData);
       closeModal();
     } catch (err) {
       console.error("Failed to save", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -69,7 +98,7 @@ export default function UserInfoCard({ data }: any) {
                 Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {data?.title || "N/A"}
+                {data?.user.name || "N/A"}
               </p>
             </div>
 
@@ -158,43 +187,61 @@ export default function UserInfoCard({ data }: any) {
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div className="col-span-2 lg:col-span-1">
                   <Label>Name</Label>
-                  <Input type="text" defaultValue={name} onChange={(e) => setName(e.target.value)} />
+                  <Input 
+                    name="name" 
+                    type="text" 
+                    defaultValue={formData.name} 
+                    onChange={handleChange} 
+                  />
                 </div>
 
                 <div className="col-span-2 lg:col-span-1">
                   <Label>Email Address</Label>
-                  <Input type="text" defaultValue={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input 
+                    name="email" 
+                    type="text" 
+                    defaultValue={formData.email} 
+                    onChange={handleChange} 
+                  />
                 </div>
 
                 <div className="col-span-2">
                   <Label>Bio</Label>
-                  <Input type="text" defaultValue={bio} onChange={(e) => setBio(e.target.value)} />
+                  <Input 
+                    name="bio" 
+                    type="text" 
+                    defaultValue={formData.bio} 
+                    onChange={handleChange} 
+                  />
                 </div>
 
                 <div className="col-span-2">
                   <Label>Specialization</Label>
                   <Input
+                    name="specialization"
                     type="text"
-                    defaultValue={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
+                    defaultValue={formData.specialization}
+                    onChange={handleChange}
                   />
                 </div>
 
                 <div className="col-span-2">
                   <Label>Research Areas</Label>
                   <Input
+                    name="researchAreas"
                     type="text"
-                    defaultValue={researchAreas}
-                    onChange={(e) => setResearchAreas(e.target.value)}
+                    defaultValue={formData.researchAreas}
+                    onChange={handleChange}
                   />
                 </div>
 
                 <div className="col-span-2">
                   <Label>Office Hours</Label>
                   <Input
+                    name="officeHours"
                     type="text"
-                    defaultValue={officeHours}
-                    onChange={(e) => setOfficeHours(e.target.value)}
+                    defaultValue={formData.officeHours}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
@@ -203,8 +250,8 @@ export default function UserInfoCard({ data }: any) {
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
+              <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
