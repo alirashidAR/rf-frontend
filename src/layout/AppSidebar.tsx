@@ -70,11 +70,11 @@ const AppSidebar: React.FC = () => {
         { name: "Metrics", path: `/admin/${role}`, pro: false },
       ],
     },
-    // {
-    //   icon: <CalenderIcon />,
-    //   name: "Calendar",
-    //   path: "/calendar",
-    // },
+    {
+      icon: <UserCircleIcon />,
+      name: "Project Page",
+      path: `/admin/${role}/others-pages/projects/1`,
+    },
     {
       icon: <UserCircleIcon />,
       name: "User Profile",
@@ -85,11 +85,11 @@ const AppSidebar: React.FC = () => {
       name: "Browse Faculties",
       path: `/admin/${role}/others-pages/profile-faculty`,
     },
-    // {
-    //   name : "Faculty Details",
-    //   icon: <UserCircleIcon />,
-    //   path: `/admin/${role}/others-pages/faculty-detail`,
-    // },
+    {
+      name : "Faculty Details",
+      icon: <UserCircleIcon />,
+      path: `/admin/${role}/others-pages/faculty-detail`,
+    },
     {
       name: "Create Project",
       icon: <ListIcon />,

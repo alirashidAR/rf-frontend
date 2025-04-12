@@ -1,13 +1,11 @@
 "use client";
 import Image from "next/image";
 
-import CountryMap from "./CountryMap";
-import { useState } from "react";
-import { MoreDotIcon } from "@/icons";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { useState,useEffect } from "react";
+import axios from "axios";
 
 export default function QuickActions() {
+  const [projects, setProjects] = useState<any[]>([]); // store the recent projects
   const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
@@ -17,6 +15,24 @@ export default function QuickActions() {
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  useEffect(() => {
+    const fetchRecentProjects = async () => {
+      try {
+        const response = await axios.get("https://rf-backend-alpha.vercel.app/api/projects/recent", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setProjects(response.data); // assuming data is an array of recent projects
+      } catch (error) {
+        console.error("Error fetching recent projects:", error);
+      }
+    };
+  
+    fetchRecentProjects();
+  }, []);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">

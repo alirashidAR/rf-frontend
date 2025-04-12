@@ -1,6 +1,8 @@
 "use client"
 import { useParams } from "next/navigation";
-
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Dialog } from '@headlessui/react'; // Or any modal lib
 // Mock data (Replace with API call later)
 const projects = [
   {
@@ -29,8 +31,21 @@ const projects = [
   },
 ];
 
+
+interface Application {
+  id: string;
+  user: {
+    profilePicUrl?: string;
+    name: string;
+    email: string;
+    department: string;
+    id: string;
+  };
+}
+
 // ✅ Fix: Use async function to correctly handle params
 export default function ProjectPage() {
+  const [isOpen, setIsOpen] = useState(false);
   // Ensure params exists before accessing its properties
   const params = useParams(); // Get params safely
 
@@ -38,6 +53,36 @@ export default function ProjectPage() {
   const project = projects.find((p) => p.id === String(params.id));
 
   if (!project) return <p>Project not found.</p>;
+
+  const [applications, setApplications] = useState<Application[]>([]);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState('');
+
+const fetchApplications = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token');
+    const res = await axios.get(
+      `https://rf-backend-alpha.vercel.app/api/application/project/${params.id}/applications`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    setApplications(res.data);
+    setError('');
+  } catch (err) {
+    console.error(err);
+    setError('Failed to load applications');
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  if (isOpen) {
+    fetchApplications();
+  }
+}, [isOpen]);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg">
@@ -83,16 +128,63 @@ export default function ProjectPage() {
 
           {/* Project Timeline */}
           <section>
-            <h2 className="text-lg font-semibold">Project Timeline</h2>
-            <div className="mt-2 space-y-2">
-              {project.timeline.map((phase, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-full ${phase.color}`}></span>
-                  <p className="text-gray-600">{phase.phase} <span className="text-sm text-gray-500">({phase.period})</span></p>
-                </div>
-              ))}
+  <button
+    onClick={() => setIsOpen(true)}
+    className="text-blue-600 underline hover:text-blue-800"
+  >
+    Click here to check Applications Received
+  </button>
+
+  <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="fixed inset-0 z-50 overflow-y-auto">
+  {/* 🔥 Blurred background overlay */}
+  <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" />
+
+  {/* Modal panel on top of the overlay */}
+  <div className="flex items-center justify-center min-h-screen relative z-50">
+    <Dialog.Panel className="bg-white p-6 rounded shadow-lg w-[90%] max-w-3xl">
+      <Dialog.Title className="text-xl font-bold mb-4">Applications Received</Dialog.Title>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : applications.length === 0 ? (
+        <p>No applications received yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {applications.map((app) => (
+            <div key={app.id} className="border p-4 rounded shadow-sm flex items-center gap-4">
+              <img
+                src={app.user.profilePicUrl || '/default-avatar.png'}
+                alt="Profile"
+                className="w-16 h-16 rounded-full"
+              />
+              <div className="flex-1">
+                <h4 className="font-semibold">{app.user.name}</h4>
+                <p className="text-sm text-gray-600">{app.user.email}</p>
+                <p className="text-sm text-gray-600">{app.user.department}</p>
+              </div>
+              <button
+                onClick={() => alert('Profile view functionality not implemented yet')}
+                className="text-blue-500 underline"
+              >
+                View Profile
+              </button>
             </div>
-          </section>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6 text-right">
+        <button onClick={() => setIsOpen(false)} className="px-4 py-2 bg-gray-200 rounded">
+          Close
+        </button>
+      </div>
+    </Dialog.Panel>
+  </div>
+</Dialog>
+
+</section>
         </div>
 
         {/* Right Column (1/3 Width) */}
@@ -106,13 +198,6 @@ export default function ProjectPage() {
             <p><strong>Positions Available:</strong> {project.details.positions}</p>
           </aside>
 
-          {/* Research Team */}
-          <aside className="bg-gray-100 p-4 rounded-lg">
-            <h2 className="text-lg font-semibold">Research Team</h2>
-            {project.team.map((member, index) => (
-              <p key={index}><strong>{member.name}</strong> - {member.role}</p>
-            ))}
-          </aside>
 
           {/* Application Deadline */}
           <aside className="bg-blue-50 p-4 rounded-lg border border-blue-300">
