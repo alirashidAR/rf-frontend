@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-export default function FacultyListHeader() {
+export default function FacultyListHeader({data}:any) {
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Faculty List</h2>

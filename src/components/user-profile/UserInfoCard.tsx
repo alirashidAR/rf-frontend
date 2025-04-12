@@ -1,69 +1,149 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-export default function UserInfoCard() {
+export default function UserInfoCard({ data: initialData }: any) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModal();
+  
+  // Keep a local copy of data that we can update after successful save
+  const [data, setData] = useState(initialData);
+  
+  const [formData, setFormData] = useState({
+    name: data?.user.name || "",
+    email: data?.contactInfo || "",
+    bio: data?.bio || "",
+    specialization: data?.specialization?.join(", ") || "",
+    researchAreas: data?.researchAreas?.filter(Boolean).join(", ") || "",
+    officeHours: data?.officeHours || ""
+  });
+  
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+      const decodedToken: any = jwtDecode(token);
+      
+      const updatedData = {
+        name: formData.name,
+        contactInfo: formData.email,
+        bio: formData.bio,
+        specialization: formData.specialization.split(",").map((s: string) => s.trim()),
+        researchAreas: formData.researchAreas.split(",").map((r: string) => r.trim()),
+        officeHours: formData.officeHours,
+      };
+      
+      const response = await axios.patch(
+        `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      console.log("Saved successfully");
+      
+      // Update the local data state to reflect changes
+      const updatedUserData = {
+        ...data,
+        user: { ...data.user, name: formData.name },
+        contactInfo: formData.email,
+        bio: formData.bio,
+        specialization: updatedData.specialization,
+        researchAreas: updatedData.researchAreas,
+        officeHours: formData.officeHours
+      };
+      
+      setData(updatedUserData);
+      closeModal();
+    } catch (err) {
+      console.error("Failed to save", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-            Personal Information
+            Faculty Information
           </h4>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                First Name
+                Name
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                StudentA
+                {data?.user.name || "N/A"}
               </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Last Name
+                Email Address
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Kumar
+                {data?.contactInfo || "N/A"}
               </p>
             </div>
 
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Email address
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                student@vitstudent.ac.in
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Phone
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                +91 9899999999
-              </p>
-            </div>
-
-            <div>
+            <div className="lg:col-span-2">
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Bio
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                3rd year Student at VIT University
+                {data?.bio || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Specialization
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {data?.specialization?.join(", ") || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Research Areas
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {(data?.researchAreas?.filter(Boolean).join(", ")) || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Office Hours
+              </p>
+              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                {data?.officeHours || "N/A"}
               </p>
             </div>
           </div>
@@ -104,72 +184,65 @@ export default function UserInfoCard() {
           </div>
           <form className="flex flex-col">
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-              <div>
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Social Links
-                </h5>
-
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.facebook.com/PimjoHQ"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type="text" defaultValue="https://x.com/PimjoHQ" />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://www.linkedin.com/company/pimjo"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input
-                      type="text"
-                      defaultValue="https://instagram.com/PimjoHQ"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                <div className="col-span-2 lg:col-span-1">
+                  <Label>Name</Label>
+                  <Input 
+                    name="name" 
+                    type="text" 
+                    defaultValue={formData.name} 
+                    onChange={handleChange} 
+                  />
                 </div>
-              </div>
-              <div className="mt-7">
-                <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-                  Personal Information
-                </h5>
 
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" defaultValue="Musharof" />
-                  </div>
+                <div className="col-span-2 lg:col-span-1">
+                  <Label>Email Address</Label>
+                  <Input 
+                    name="email" 
+                    type="text" 
+                    defaultValue={formData.email} 
+                    onChange={handleChange} 
+                  />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" defaultValue="Chowdhury" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Bio</Label>
+                  <Input 
+                    name="bio" 
+                    type="text" 
+                    defaultValue={formData.bio} 
+                    onChange={handleChange} 
+                  />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Email Address</Label>
-                    <Input type="text" defaultValue="randomuser@pimjo.com" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Specialization</Label>
+                  <Input
+                    name="specialization"
+                    type="text"
+                    defaultValue={formData.specialization}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Phone</Label>
-                    <Input type="text" defaultValue="+09 363 398 46" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Research Areas</Label>
+                  <Input
+                    name="researchAreas"
+                    type="text"
+                    defaultValue={formData.researchAreas}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" defaultValue="Team Manager" />
-                  </div>
+                <div className="col-span-2">
+                  <Label>Office Hours</Label>
+                  <Input
+                    name="officeHours"
+                    type="text"
+                    defaultValue={formData.officeHours}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
             </div>
@@ -177,8 +250,8 @@ export default function UserInfoCard() {
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
+              <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
