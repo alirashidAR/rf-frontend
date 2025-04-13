@@ -306,6 +306,14 @@ export default function ProjectPage() {
               Already Applied
             </button>
           )}
+          {role === "FACULTY" && (
+            <button 
+              className="border px-4 py-2 rounded hover:bg-gray-100 transition text-gray-500"
+              onClick={() => router.push(`/admin/FACULTY/others-pages/forms/form-elements?editId=${project.id}`)}
+            >
+              Edit Project
+            </button>
+          )}
           {/* Favorite button */}
           <button 
             className={`border px-4 py-2 rounded hover:bg-gray-100 transition ${
@@ -458,12 +466,12 @@ export default function ProjectPage() {
           {/* Action Buttons for Faculty */}
           {role === "FACULTY" && (
             <div className="flex flex-col gap-3">
-              <button 
+              {/* <button 
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full"
                 onClick={() => router.push(`/admin/FACULTY/others-pages/forms/edit-project/${project.id}`)}
               >
                 Edit Project
-              </button>
+              </button> */}
               <button 
                 className="border border-blue-500 text-blue-600 px-4 py-2 rounded hover:bg-blue-50 transition w-full"
                 onClick={() => router.push(`/admin/FACULTY/others-pages/applications/${project.id}`)}

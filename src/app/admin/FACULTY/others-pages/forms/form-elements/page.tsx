@@ -1,9 +1,10 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ComponentCard from "@/components/common/ComponentCard";
 import { useAuth } from "@/context/AuthContext";
+
 
 
 interface FormData {
@@ -20,13 +21,14 @@ interface FormData {
   status: "ONGOING" | "COMPLETED" | "PENDING";
 }
 
+// Update the formatToDateTimeLocal function
 const formatToDateTimeLocal = (isoString: string) => {
   if (!isoString) return "";
   const date = new Date(isoString);
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
   return localDate.toISOString().slice(0, 16);
 };
+
 
 const formatToISOString = (localString: string) => {
   if (!localString) return "";
@@ -36,6 +38,9 @@ const formatToISOString = (localString: string) => {
 
 const FormElements = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('editId');
+  const [isEditing, setIsEditing] = useState(false);
   const { facultyId } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
@@ -135,37 +140,83 @@ const FormElements = () => {
     }
   };
 
+  // Replace handlePublishProject with:
   const handlePublishProject = async () => {
-    if (!validateForm()) {
-      console.warn("Form has validation errors.");
-      return;
-    }
+    if (!validateForm()) return;
+
     try {
-      console.log(localStorage.getItem("token"));
-      
-      const response = await axios.post(
-        "https://rf-backend-alpha.vercel.app/api/projects/create",
-        formData,
+      const url = isEditing 
+        ? `https://rf-backend-alpha.vercel.app/api/projects/${editId}`
+        : 'https://rf-backend-alpha.vercel.app/api/projects/create';
+
+      const method = isEditing ? 'put' : 'post';
+
+      const response = await axios[method](url, formData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      console.log(`${isEditing ? 'Updated' : 'Created'} project:`, response.data);
+      router.push(isEditing 
+        ? `/admin/FACULTY/others-pages/projects/${editId}`
+        : '/admin/FACULTY/others-pages/blank'
+      );
+    } catch (error) {
+      console.error(`Error ${isEditing ? 'updating' : 'creating'} project:`, error);
+    }
+  };
+
+
+  // Add useEffect hook after form state initialization
+useEffect(() => {
+  const fetchProject = async () => {
+    if (!editId) return;
+    
+    try {
+      const response = await axios.get(
+        `https://rf-backend-alpha.vercel.app/api/projects/${editId}`,
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      console.log("Project published successfully:", response.data);
-      router.push("/admin/FACULTY/others-pages/blank"); // Redirect after successful publish
+
+      const projectData = response.data;
+      setFormData({
+        title: projectData.title,
+        description: projectData.description,
+        keywords: projectData.keywords,
+        type: projectData.type,
+        startDate: projectData.startDate,
+        endDate: projectData.endDate,
+        applicationDeadline: projectData.applicationDeadline,
+        positionsAvailable: projectData.positionsAvailable,
+        location: projectData.location,
+        requirements: projectData.requirements,
+        status: projectData.status
+      });
+      setIsEditing(true);
     } catch (error) {
-      console.error("Error publishing project:", error);
+      console.error('Error fetching project:', error);
+      router.push('/error');
     }
   };
+
+  fetchProject();
+}, [editId, router]);
+
   
 
   return (
     <div className="max-w-5xl mx-auto p-8">
       <ComponentCard
-        title="Create New Research Project"
-        desc="Post a new research opportunity for student collaboration"
+        title={isEditing ? "Edit Research Project" : "Create New Research Project"}
+        desc={isEditing 
+          ? "Update your research project details" 
+          : "Post a new research opportunity for student collaboration"}
       >
         {/* Basic Information */}
         <ComponentCard title="Basic Information" className="mt-4">
@@ -337,7 +388,17 @@ const FormElements = () => {
         </ComponentCard>
 
         {/* Buttons */}
-        <div className="mt-6 flex justify-between">
+      <div className="mt-6 flex justify-between gap-4">
+        {isEditing && (
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="border border-gray-400 text-gray-600 px-6 py-2 rounded hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+        )}
+        <div className="flex gap-4 ml-auto">
           <button
             type="button"
             onClick={handleSaveDraft}
@@ -350,9 +411,11 @@ const FormElements = () => {
             onClick={handlePublishProject}
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
-            Publish Project
+            {isEditing ? 'Update Project' : 'Publish Project'}
           </button>
         </div>
+      </div>
+
       </ComponentCard>
     </div>
   );
