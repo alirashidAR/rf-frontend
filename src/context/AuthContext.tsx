@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -37,7 +36,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ role, setRole, name, setName, profilePic, setProfilePic, facultyId, setFacultyId }}>
+    <AuthContext.Provider
+      value={{
+        role,
+        setRole,
+        name,
+        setName,
+        profilePic,
+        setProfilePic,
+        facultyId,
+        setFacultyId,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
