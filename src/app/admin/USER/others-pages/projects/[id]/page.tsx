@@ -1,47 +1,81 @@
-"use client"
-import { useParams } from "next/navigation";
+"use client";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
 
-// Mock data (Replace with API call later)
-const projects = [
-  {
-    id: "1",
-    title: "AI in Healthcare Research",
-    status: "Pending",
-    professor: "Prof. Sarah Johnson",
-    department: "Computer Science Department",
-    description:
-      "A cutting-edge research initiative focused on developing artificial intelligence algorithms for early disease detection and diagnosis. This project aims to leverage machine learning techniques to analyze patient data and improve healthcare outcomes.",
-    tags: ["Machine Learning", "Healthcare", "Data Analysis"],
-    requirements: [
-      "Strong background in machine learning and data analysis",
-      "Programming proficiency in Python and related ML frameworks",
-      "Understanding of healthcare data privacy regulations",
-      "Excellent analytical and problem-solving skills",
-    ],
-    timeline: [
-      { phase: "Phase 1: Data Collection", period: "Jan 2024 - Mar 2024", color: "bg-green-500" },
-      { phase: "Phase 2: Model Development", period: "Apr 2024 - Jun 2024", color: "bg-blue-500" },
-      { phase: "Phase 3: Testing and Validation", period: "Jul 2024 - Sep 2024", color: "bg-gray-500" },
-    ],
-    details: { duration: "9 months", startDate: "January 15, 2024", location: "Remote / On-campus", positions: 3 },
-    team: [{ name: "Prof. Sarah Johnson", role: "Project Lead" }, { name: "Dr. Mark Wilson", role: "Research Associate" }],
-    deadline: { date: "January 10, 2024", daysRemaining: 5 },
-  },
-];
-
-// ✅ Fix: Use async function to correctly handle params
 export default function ProjectPage() {
-  // Ensure params exists before accessing its properties
-  const params = useParams(); // Get params safely
+  const [applied, setApplied] = useState(false);
+  const router = useRouter();
+  const params = useParams();
+  const { id } = params || {};
 
-  if (!params?.id) return <p>Loading...</p>; // Ensure id exists
-  const project = projects.find((p) => p.id === String(params.id));
+  // Mock data (to be replaced with actual fetch by ID)
+  const projects = [
+    {
+      id: "1",
+      title: "AI in Healthcare Research",
+      status: "Pending",
+      professor: "Prof. Sarah Johnson",
+      department: "Computer Science Department",
+      description:
+        "A cutting-edge research initiative focused on developing artificial intelligence algorithms...",
+      tags: ["Machine Learning", "Healthcare", "Data Analysis"],
+      requirements: [
+        "Strong background in machine learning",
+        "Programming proficiency in Python",
+        "Understanding of data privacy",
+        "Problem-solving skills",
+      ],
+      timeline: [
+        { phase: "Phase 1", period: "Jan 2024 - Mar 2024", color: "bg-green-500" },
+        { phase: "Phase 2", period: "Apr 2024 - Jun 2024", color: "bg-blue-500" },
+        { phase: "Phase 3", period: "Jul 2024 - Sep 2024", color: "bg-gray-500" },
+      ],
+      details: {
+        duration: "9 months",
+        startDate: "January 15, 2024",
+        location: "Remote / On-campus",
+        positions: 3,
+      },
+      team: [
+        { name: "Prof. Sarah Johnson", role: "Project Lead" },
+        { name: "Dr. Mark Wilson", role: "Research Associate" },
+      ],
+      deadline: { date: "January 10, 2024", daysRemaining: 5 },
+    },
+  ];
 
+  const project = projects.find((p) => p.id === String(id));
+
+  const handleApply = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `https://rf-backend-alpha.vercel.app/api/applications/project/${id}/apply`,
+        {}, // No body; user info comes from token
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Application successful:", response.data);
+      setApplied(true);
+    } catch (error: any) {
+      console.error("Error applying to project:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Failed to apply.");
+    }
+  };
+
+  if (!id) return <p>Loading...</p>;
   if (!project) return <p>Project not found.</p>;
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold">
@@ -52,15 +86,19 @@ export default function ProjectPage() {
         </div>
         <div className="flex gap-3">
           <button className="border px-4 py-2 rounded text-blue-500">Share</button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded">Apply Now</button>
+          {applied ? (
+            <div className="text-green-600 font-semibold">Applied successfully ✅</div>
+          ) : (
+            <button onClick={handleApply} className="bg-blue-600 text-white px-4 py-2 rounded">
+              Apply Now
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Two-Column Layout */}
+      {/* Body */}
       <div className="grid grid-cols-3 gap-8 mt-6">
-        {/* Left Column (2/3 Width) */}
         <div className="col-span-2 space-y-6">
-          {/* Project Overview */}
           <section>
             <h2 className="text-lg font-semibold">Project Overview</h2>
             <p className="text-gray-600">{project.description}</p>
@@ -71,7 +109,6 @@ export default function ProjectPage() {
             </div>
           </section>
 
-          {/* Requirements */}
           <section>
             <h2 className="text-lg font-semibold">Requirements</h2>
             <ul className="list-disc list-inside text-gray-600">
@@ -80,24 +117,10 @@ export default function ProjectPage() {
               ))}
             </ul>
           </section>
-
-          {/* Project Timeline */}
-          <section>
-            <h2 className="text-lg font-semibold">Project Timeline</h2>
-            <div className="mt-2 space-y-2">
-              {project.timeline.map((phase, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-full ${phase.color}`}></span>
-                  <p className="text-gray-600">{phase.phase} <span className="text-sm text-gray-500">({phase.period})</span></p>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
 
-        {/* Right Column (1/3 Width) */}
+        {/* Sidebar */}
         <div className="col-span-1 space-y-6">
-          {/* Sidebar - Project Details */}
           <aside className="bg-gray-100 p-4 rounded-lg">
             <h2 className="text-lg font-semibold">Project Details</h2>
             <p><strong>Duration:</strong> {project.details.duration}</p>
@@ -106,15 +129,6 @@ export default function ProjectPage() {
             <p><strong>Positions Available:</strong> {project.details.positions}</p>
           </aside>
 
-          {/* Research Team */}
-          <aside className="bg-gray-100 p-4 rounded-lg">
-            <h2 className="text-lg font-semibold">Research Team</h2>
-            {project.team.map((member, index) => (
-              <p key={index}><strong>{member.name}</strong> - {member.role}</p>
-            ))}
-          </aside>
-
-          {/* Application Deadline */}
           <aside className="bg-blue-50 p-4 rounded-lg border border-blue-300">
             <h2 className="text-lg font-semibold">Application Deadline</h2>
             <p className="text-blue-600 font-bold">{project.deadline.date}</p>
