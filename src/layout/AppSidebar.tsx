@@ -29,7 +29,7 @@ const othersItems: NavItem[] = [
     icon: <Bell className="w-5 h-5" />,
     name: "Updates",
     subItems: [
-      { name: "Notifications", path: "/admin/notifications", pro: false },
+      { name: "Notifications", path: "/admin/FACULTY/notifications", pro: false },
       { name: "Messages", path: "/admin/messages", pro: false },
     ],
   },
