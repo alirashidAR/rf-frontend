@@ -1,3 +1,5 @@
+//UserDropdown.tsx
+
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { name, role } = useAuth();
+  const { name, role, email, loading } = useAuth();
 
   const profilePic = typeof window !== "undefined" 
     ? localStorage.getItem("profilePic") 
@@ -65,12 +67,14 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
         className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
         <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Student A
-          </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            studentA@vitstudent.ac.in
-          </span>
+        <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
+          {name || "Loading..."}
+        </span>
+        <div>
+         
+        <span className="text-gray-500">{email}</span>
+         
+  </div>
         </div>
 
         <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
