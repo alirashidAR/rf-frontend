@@ -1,51 +1,79 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
-import { useRouter,useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
-
 import ComponentCard from "@/components/common/ComponentCard";
 import axios from "axios";
-// Remove the duplicate import and ensure the correct path is used
+
 const SearchResults = () => {
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  //const [query, setQuery] = useState("");
   const router = useRouter();
-  // const [searchResults, setSearchResults] = useState([]);
-  // const [type, setType] = useState<string[]>([]);
-  // const [status, setStatus] = useState<string[]>([]);
-  // const [department, setDepartment] = useState<string | null>(null);
-  // const [page, setPage] = useState(1);
-  // const pageSize = 10;
+
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    query: searchParams.get("query") || "",
+    query: "",
     department: "",
-    status: "",
-    type: "",
+    status: [] as string[],
+    type: [] as string[],
+    location: "",
     page: 1,
     pageSize: 10,
   });
 
+  // ✅ Update filters.query when the search param changes
+  useEffect(() => {
+    const newQuery = searchParams.get("query") || "";
+    setFilters((prev) => ({
+      ...prev,
+      query: newQuery,
+      page: 1,
+    }));
+  }, [searchParams]);
+
+  const handleCheckboxChange = (category: "type" | "status", value: string) => {
+    setFilters((prev) => {
+      const updatedCategory = prev[category].includes(value)
+        ? prev[category].filter((v) => v !== value)
+        : [...prev[category], value];
+
+      return {
+        ...prev,
+        [category]: updatedCategory,
+      };
+    });
+  };
+
+  const handleLocationChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      location: prev.location === value ? "" : value,
+    }));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
   useEffect(() => {
     const fetchResults = async () => {
-      if (!filters.query) return;
+      if (!filters.query && filters.status.length === 0 && filters.type.length === 0) return;
 
       setLoading(true);
       try {
-        const res = await axios.post("https://rf-backend-alpha.vercel.app/api/search/projects", {
+        const res = await axios.post("http://rf-backend-alpha.vercel.app/api/search/projects", {
           ...filters,
         });
 
         const data = res.data;
-        if (Array.isArray(data)) {
-          setResults(data); // Set the results if it's an array
+        if (Array.isArray(data.projects)) {
+          setResults(data.projects);
         } else {
-          setResults([]); // Fallback to an empty array if the response is not an array
+          setResults([]);
           console.error("API response is not an array:", data);
         }
       } catch (err) {
@@ -57,25 +85,7 @@ const SearchResults = () => {
     };
 
     fetchResults();
-  }, [filters.query]);
-
-  // useEffect(() => {
-  //   const handleKeyDown = (event: KeyboardEvent) => {
-  //     if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-  //       event.preventDefault();
-  //       inputRef.current?.focus();
-  //     }
-  //     if (event.key === "Enter" && document.activeElement === inputRef.current) {
-  //       event.preventDefault();
-  //       handleSearch();
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", handleKeyDown);
-  //   return () => document.removeEventListener("keydown", handleKeyDown);
-  // }, [query]);
-
-
+  }, [filters]);
 
   return (
     <div className="flex gap-6 p-6 min-h-screen bg-gray-100">
@@ -84,42 +94,104 @@ const SearchResults = () => {
         <div>
           <p className="font-medium">Project Type</p>
           <ul className="space-y-2">
-            <li><input type="checkbox" /> Research Projects</li>
-            <li><input type="checkbox" /> Thesis</li>
-            <li><input type="checkbox" /> Collaboration</li>
+            {["RESEARCH", "INDUSTRY"].map((type) => (
+              <li key={type}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.type.includes(type)}
+                    onChange={() => handleCheckboxChange("type", type)}
+                    className="mr-2"
+                  />
+                  {type}
+                </label>
+              </li>
+            ))}
           </ul>
         </div>
-        <div className="mt-4">
-          <p className="font-medium">Duration</p>
-          <ul className="space-y-2">
-            <li><input type="checkbox" /> 0-6 months</li>
-            <li><input type="checkbox" /> 6-12 months</li>
-            <li><input type="checkbox" /> 1+ year</li>
-          </ul>
-        </div>
+
         <div className="mt-4">
           <p className="font-medium">Status</p>
           <ul className="space-y-2">
-            <li><input type="checkbox" /> Open for Applications</li>
-            <li><input type="checkbox" /> Ongoing</li>
-            <li><input type="checkbox" /> Completed</li>
+            {["ONGOING", "PENDING", "COMPLETED"].map((status) => (
+              <li key={status}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.status.includes(status)}
+                    onChange={() => handleCheckboxChange("status", status)}
+                    className="mr-2"
+                  />
+                  {status}
+                </label>
+              </li>
+            ))}
           </ul>
+        </div>
+
+        <div className="mt-4">
+          <p className="font-medium">Location</p>
+          <div className="space-y-2">
+            {["REMOTE", "ON_CAMPUS"].map((location) => (
+              <div key={location} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={location}
+                  checked={filters.location === location}
+                  onChange={() => handleLocationChange(location)}
+                  className="mr-2"
+                />
+                <label htmlFor={location} className="text-sm">
+                  {location}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
       </ComponentCard>
 
       {/* Search Results Section */}
       <ComponentCard title={`Search Results (${results.length})`} className="w-3/4 shadow-md">
-        {Array.isArray(results) && results.length > 0 ? (
+
+        {/* ✅ Search Bar */}
+        <div className="mb-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const value = inputRef.current?.value || "";
+              router.push(`/search-results?query=${encodeURIComponent(value)}`);
+            }}
+            className="flex gap-2"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              defaultValue={filters.query}
+              placeholder="Search projects..."
+              className="p-2 border border-gray-300 rounded w-full"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : results.length > 0 ? (
           results.map((project, index) => (
             <ComponentCard
               key={index}
               title={project.title || "Untitled Project"}
-              desc={`${project.facultyName || "Unknown"} • ${project.department || "N/A"} Department`}
+              desc={`${project.faculty.user.name || "Unknown"} • ${project.faculty.user.department || "N/A"} Department`}
               className="mt-4 cursor-pointer hover:bg-gray-100"
               onClick={() => router.push(`/admin/others-pages/projects/${project.id || ""}`)}
             >
               <div className="mt-2">
-                {(project.tags || []).map((tag: string) => (
+                {(project.keywords || []).map((tag: string) => (
                   <span
                     key={tag}
                     className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs mr-2"
@@ -134,6 +206,25 @@ const SearchResults = () => {
         ) : (
           <p>No results found.</p>
         )}
+
+        {/* Pagination */}
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={() => handlePageChange(filters.page - 1)}
+            disabled={filters.page === 1}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+          >
+            Previous
+          </button>
+          <span>Page {filters.page}</span>
+          <button
+            onClick={() => handlePageChange(filters.page + 1)}
+            disabled={results.length < filters.pageSize}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+          >
+            Next
+          </button>
+        </div>
       </ComponentCard>
     </div>
   );

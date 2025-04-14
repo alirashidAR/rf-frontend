@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState ,useEffect,useRef} from "react";
+import { usePathname } from "next/navigation";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -55,6 +56,8 @@ const AppHeader: React.FC = () => {
     };
   }, [query]);
     
+  const pathname = usePathname();
+  const hideSearchBar = pathname === "/search-results";
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -135,7 +138,7 @@ const AppHeader: React.FC = () => {
               />
             </svg>
           </button>
-
+          {!hideSearchBar && (
           <div className="hidden lg:block">
             <form>
               <div className="relative">
@@ -172,7 +175,9 @@ const AppHeader: React.FC = () => {
               </div>
             </form>
           </div>
+        )}
         </div>
+  
         <div
           className={`${
             isApplicationMenuOpen ? "flex" : "hidden"
