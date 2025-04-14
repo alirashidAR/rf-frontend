@@ -1,128 +1,95 @@
 "use client";
-import Image from "next/image";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-import CountryMap from "./CountryMap";
-import { useState } from "react";
-import { MoreDotIcon } from "@/icons";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+interface Project {
+  id: string;
+  title: string;
+  faculty: {
+    user: {
+      name: string;
+      department?: string;
+    };
+  };
+  applications: any[]; // Array of applications
+}
 
-export default function DemographicCard() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function TrendingProjects() {
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
+  useEffect(() => {
+    const fetchTrendingProjects = async () => {
+      try {
+        const response = await axios.get(
+          "https://rf-backend-alpha.vercel.app/api/projects/trending",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+        // Filter out projects with 0 applications
+        const filteredProjects = response.data.projects.filter(
+          (project: Project) => project.applications && project.applications.length > 0
+        );
+
+        setProjects(filteredProjects);
+      } catch (error) {
+        console.error("Error fetching trending projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrendingProjects();
+  }, []);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-      <div className="flex justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Trending Projects
-          </h3>
-        </div>
-
-        {/* <div className="relative inline-block">
-          <button onClick={toggleDropdown} className="dropdown-toggle">
-            <MoreDotIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
-          </button>
-          <Dropdown
-            isOpen={isOpen}
-            onClose={closeDropdown}
-            className="w-40 p-2"
-          >
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              View More
-            </DropdownItem>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex w-full font-normal text-left text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-              Delete
-            </DropdownItem>
-          </Dropdown>
-        </div> */}
+      <div className="flex justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+          Trending Projects
+        </h3>
       </div>
-      {/* <div className="px-4 py-6 my-6 overflow-hidden border border-gary-200 rounded-2xl bg-gray-50 dark:border-gray-800 dark:bg-gray-900 sm:px-6">
-        <div
-          id="mapOne"
-          className="mapOne map-btn -mx-4 -my-6 h-[212px] w-[252px] 2xsm:w-[307px] xsm:w-[358px] sm:-mx-6 md:w-[668px] lg:w-[634px] xl:w-[393px] 2xl:w-[554px]"
-        >
-          <CountryMap />
+
+      {loading ? (
+        <div className="text-center py-4">
+          <p className="text-gray-500">Loading projects...</p>
         </div>
-      </div> */}
-
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="items-center w-full rounded-full max-w-8">
-              {/* <Image
-                width={48}
-                height={48}
-                src="/images/country/country-01.svg"
-                alt="usa"
-                className="w-full"
-              /> */}
-            </div>
-            <div>
-              {/* <p className="font-semibold text-gray-800 text-theme-sm dark:text-white/90">
-                USA
-              </p>
-              <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                2,379 Customers
-              </span> */}
-            </div>
-          </div>
-
-          <div className="flex w-full max-w-[140px] items-center gap-3">
-            {/* <div className="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200 dark:bg-gray-800">
-              <div className="absolute left-0 top-0 flex h-full w-[79%] items-center justify-center rounded-sm bg-brand-500 text-xs font-medium text-white"></div>
-            </div> */}
-            {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-              79%
-            </p> */}
-          </div>
+      ) : projects.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-gray-500">No trending projects found</p>
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="items-center w-full rounded-full max-w-8">
-              {/* <Image
-                width={48}
-                height={48}
-                className="w-full"
-                src="/images/country/country-02.svg"
-                alt="france"
-              /> */}
+      ) : (
+        <div className="space-y-4">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              onClick={() => router.push(`/admin/USER/others-pages/projects/${project.id}`)}
+              className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium text-gray-800 dark:text-white/90">
+                    {project.title}
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Led by {project.faculty?.user?.name || "Unknown Faculty"} •{" "}
+                    {project.faculty?.user?.department || "No Department"}
+                  </p>
+                </div>
+                <span className="text-sm px-2 py-1 rounded bg-blue-100 text-blue-700">
+                  {project.applications.length} Applications
+                </span>
+              </div>
             </div>
-            <div>
-              {/* <p className="font-semibold text-gray-800 text-theme-sm dark:text-white/90">
-                France
-              </p>
-              <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                589 Customers
-              </span> */}
-            </div>
-          </div>
-
-          <div className="flex w-full max-w-[140px] items-center gap-3">
-            {/* <div className="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200 dark:bg-gray-800">
-              <div className="absolute left-0 top-0 flex h-full w-[23%] items-center justify-center rounded-sm bg-brand-500 text-xs font-medium text-white"></div>
-            </div>
-            <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-              23%
-            </p> */}
-          </div>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

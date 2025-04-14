@@ -1,11 +1,30 @@
 "use client";
-import Image from "next/image";
-
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+
+interface User {
+  name: string;
+}
+
+interface Faculty {
+  user: User;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  faculty: Faculty;
+  createdAt: string;
+  status: string;
+  location: string;
+  type: string;
+}
 
 export default function QuickActions() {
-  const [projects, setProjects] = useState<any[]>([]); // store the recent projects
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
@@ -19,58 +38,112 @@ export default function QuickActions() {
   useEffect(() => {
     const fetchRecentProjects = async () => {
       try {
-        const response = await axios.get("https://rf-backend-alpha.vercel.app/api/projects/recent", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setProjects(response.data); // assuming data is an array of recent projects
+        const response = await axios.get(
+          "https://rf-backend-alpha.vercel.app/api/projects/recent",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        // Filter out projects with status "COMPLETED"
+        const filteredProjects = response.data.projects.filter(
+          (project: Project) => project.status !== "COMPLETED"
+        );
+
+        setProjects(filteredProjects);
       } catch (error) {
         console.error("Error fetching recent projects:", error);
+      } finally {
+        setLoading(false);
       }
     };
-  
+
     fetchRecentProjects();
   }, []);
 
+  const normalizeStatus = (status: string) => {
+    switch (status) {
+      case "ONGOING":
+        return "Active";
+      case "PENDING":
+        return "Pending";
+      case "COMPLETED":
+        return "Completed";
+      default:
+        return status;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-      <div className="flex justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Recent Projects
-          </h3>
-        </div>
-
-        
+      <div className="flex justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+          Recent Projects
+        </h3>
       </div>
-      
 
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-        
-            <div>
-              {/* <p className="font-semibold text-gray-800 text-theme-sm dark:text-white/90">
-                USA
-              </p>
-              <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                2,379 Customers
-              </span> */}
+      {loading ? (
+        <div className="text-center py-4">
+          <p className="text-gray-500">Loading projects...</p>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-gray-500">No recent projects found</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              onClick={() =>
+                router.push(`/admin/USER/others-pages/projects/${project.id}`)
+              }
+              className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium text-gray-800 dark:text-white/90">
+                    {project.title}
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {project.faculty?.user?.name || "Unknown Faculty"} •{" "}
+                    {formatDate(project.createdAt)}
+                  </p>
+                </div>
+                <span
+                  className={`text-sm px-2 py-1 rounded ${
+                    project.status === "ONGOING"
+                      ? "bg-green-100 text-green-700"
+                      : project.status === "PENDING"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {normalizeStatus(project.status)}
+                </span>
+              </div>
+              <div className="mt-2 flex gap-2">
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  {project.type}
+                </span>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                  {project.location === "ON_CAMPUS" ? "On Campus" : "Remote"}
+                </span>
+              </div>
             </div>
-          </div>
-
-          <div className="flex w-full max-w-[140px] items-center gap-3">
-            {/* <div className="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200 dark:bg-gray-800">
-              <div className="absolute left-0 top-0 flex h-full w-[79%] items-center justify-center rounded-sm bg-brand-500 text-xs font-medium text-white"></div>
-            </div> */}
-            {/* <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-              79%
-            </p> */}
-          </div>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

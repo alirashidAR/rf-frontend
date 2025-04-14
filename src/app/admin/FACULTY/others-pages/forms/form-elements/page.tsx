@@ -5,8 +5,6 @@ import axios from "axios";
 import ComponentCard from "@/components/common/ComponentCard";
 import { useAuth } from "@/context/AuthContext";
 
-
-
 interface FormData {
   title: string;
   description: string;
@@ -21,7 +19,6 @@ interface FormData {
   status: "ONGOING" | "COMPLETED" | "PENDING";
 }
 
-// Update the formatToDateTimeLocal function
 const formatToDateTimeLocal = (isoString: string) => {
   if (!isoString) return "";
   const date = new Date(isoString);
@@ -29,11 +26,10 @@ const formatToDateTimeLocal = (isoString: string) => {
   return localDate.toISOString().slice(0, 16);
 };
 
-
 const formatToISOString = (localString: string) => {
   if (!localString) return "";
   const date = new Date(localString);
-  return date.toISOString();
+  return new Date(date.getTime() + (date.getTimezoneOffset() * 60000)).toISOString();
 };
 
 const FormElements = () => {
@@ -76,43 +72,61 @@ const FormElements = () => {
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
 
-  // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
     const isDateField = ["startDate", "endDate", "applicationDeadline"].includes(name);
-    const formattedValue = isDateField ? new Date(value).toISOString() : value;
-  
+    const formattedValue = isDateField ? formatToISOString(value) : value;
+
     if (name === "keywords") {
       setFormData({ ...formData, keywords: value.split(",").map((kw) => kw.trim()) });
     } else if (name === "positionsAvailable") {
       setFormData({ ...formData, positionsAvailable: Number(value) });
     } else {
-      setFormData({ ...formData, [name]: formattedValue  });
+      setFormData({ ...formData, [name]: formattedValue });
     }
   };
 
-  // Load draft data from localStorage
   useEffect(() => {
-    try {
-      const savedData = localStorage.getItem("savedProject");
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
+    const fetchProject = async () => {
+      if (!editId) return;
+      
+      try {
+        const response = await axios.get(
+          `https://rf-backend-alpha.vercel.app/api/projects/${editId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const projectData = response.data;
         setFormData({
-          ...parsedData,
-          keywords: Array.isArray(parsedData.keywords)
-            ? parsedData.keywords
-            : parsedData.keywords.split(",").map((kw: string) => kw.trim()), // Ensure keywords is an array
+          title: projectData.title,
+          description: projectData.description,
+          keywords: projectData.keywords,
+          type: projectData.type,
+          startDate: projectData.startDate,
+          endDate: projectData.endDate,
+          applicationDeadline: projectData.applicationDeadline,
+          positionsAvailable: projectData.positionsAvailable,
+          location: projectData.location,
+          requirements: projectData.requirements,
+          status: projectData.status
         });
+        setIsEditing(true);
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        router.push('/error');
       }
-    } catch (error) {
-      console.error("Error loading saved project:", error);
-    }
-  }, []);
+    };
+
+    fetchProject();
+  }, [editId, router]);
 
   // Save draft function
   const handleSaveDraft = async () => {
@@ -165,6 +179,7 @@ const FormElements = () => {
       );
     } catch (error) {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} project:`, error);
+      alert(`Failed to ${isEditing ? 'update' : 'create'} project. Please check all fields and try again.`);
     }
   };
 

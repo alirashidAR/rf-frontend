@@ -289,14 +289,25 @@ export default function ProjectPage() {
         </div>
         <div className="flex gap-3">
           {/* If current user hasn't applied yet */}
-          {role !== "FACULTY" && project.applications.length === 0 && (
-            <button 
+          {role !== "FACULTY" && project.status !== "COMPLETED" && project.applications.length === 0 && (
+            <button
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              onClick={() => router.push(`/admin/USER/others-pages/applications/new-application/${project.id}`)}
+              onClick={() =>
+                router.push(`/admin/USER/others-pages/applications/new-application/${project.id}`)
+              }
             >
               Apply Now
             </button>
           )}
+
+          {role !== "FACULTY" && project.status === "COMPLETED" && (
+              <button
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-not-allowed"
+                disabled
+              >
+                Applications Closed
+              </button>
+            )}
           {/* If user already applied */}
           {role !== "FACULTY" && project.applications.length > 0 && (
             <button 
@@ -306,6 +317,7 @@ export default function ProjectPage() {
               Already Applied
             </button>
           )}
+
           {role === "FACULTY" && (
             <button 
               className="border px-4 py-2 rounded hover:bg-gray-100 transition text-gray-500"
@@ -490,7 +502,7 @@ export default function ProjectPage() {
                       },
                     })
                     .then(() => {
-                      router.push("/admin/FACULTY/others-pages/my-projects");
+                      router.push("/admin/FACULTY/others-pages/blank");
                     })
                     .catch(err => {
                       console.error("Error deleting project:", err);

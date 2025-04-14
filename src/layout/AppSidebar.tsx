@@ -90,11 +90,13 @@ const AppSidebar: React.FC = () => {
       icon: <UserCircleIcon />,
       path: `/admin/${role}/others-pages/faculty-detail`,
     },
-    {
-      name: "Create Project",
-      icon: <ListIcon />,
-      path: `/admin/${role}/others-pages/forms/form-elements`,
-    },
+    ...(role === "FACULTY"
+      ? [{
+          name: "Create Project",
+          icon: <ListIcon />,
+          path: `/admin/${role}/others-pages/forms/form-elements`,
+        }]
+      : []),
     // {
     //   name: "Tables",
     //   icon: <TableIcon />,
