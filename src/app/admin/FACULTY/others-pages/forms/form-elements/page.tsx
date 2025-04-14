@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -32,7 +33,7 @@ const formatToISOString = (localString: string) => {
   return new Date(date.getTime() + (date.getTimezoneOffset() * 60000)).toISOString();
 };
 
-const FormElements = () => {
+const FormElementsComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('editId');
@@ -436,4 +437,11 @@ useEffect(() => {
   );
 };
 
-export default FormElements;
+
+export default function FormElementsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FormElementsComponent/>
+    </Suspense>
+  );
+}
