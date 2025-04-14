@@ -61,7 +61,7 @@ export default function ApplicationsPage() {
     try {
       const token = localStorage.getItem("token");
       await axios.patch(
-        `https://rf-backend-alpha.vercel.app/api/applications/${applicationId}/status`,
+        `https://rf-backend-alpha.vercel.app/api/${applicationId}/status`,
         { status },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -84,7 +84,7 @@ export default function ApplicationsPage() {
     updateStatus(applicationId, "REJECTED");
 
   const handleViewProfile = (userId: string) => {
-    router.push(`/admin/FACULTY/others-pages/profile/${userId}`);
+    router.push(`/admin/USER/others-pages/profile/${userId}`);
   };
 
   return (

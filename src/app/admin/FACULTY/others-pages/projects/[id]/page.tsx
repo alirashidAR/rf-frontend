@@ -123,26 +123,30 @@ export default function ProjectPage() {
     }
   };
 
-  const handleRemoveParticipant = async (participantId: string) => {
+  const handleRemoveParticipant = async (participantUserId: string) => {
     if (!window.confirm("Are you sure you want to remove this participant from the project?")) {
       return;
     }
-
+  
     const localToken = localStorage.getItem("token");
     
     try {
-      await axios.delete(`https://rf-backend-alpha.vercel.app/api/projects/${id}/participants/${participantId}`, {
-        headers: {
-          Authorization: `Bearer ${localToken}`,
-        },
-      });
+      // Corrected URL structure to match backend route
+      await axios.delete(
+        `https://rf-backend-alpha.vercel.app/api/projects/${id}/participants/${participantUserId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localToken}`,
+          },
+        }
+      );
       
       // Update local state to reflect the removal
       setProject(prev => {
         if (!prev) return null;
         return {
           ...prev,
-          participants: prev.participants.filter(p => p.user.id !== participantId)
+          participants: prev.participants.filter(p => p.user.id !== participantUserId)
         };
       });
       
@@ -153,6 +157,8 @@ export default function ProjectPage() {
       alert("Failed to remove participant. Please try again.");
     }
   };
+  
+  
 
   const handleApplicationAction = async (applicationId: string, status: 'ACCEPTED' | 'REJECTED') => {
     if (!window.confirm(`Are you sure you want to ${status.toLowerCase()} this application?`)) {
