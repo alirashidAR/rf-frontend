@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
+import { message } from "antd";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import ComponentCard from "@/components/common/ComponentCard";
+import 'antd/dist/reset.css'; // for Ant Design v5
 
 export default function NewApplication() {
 const { id } = useParams<{ id: string }>();
@@ -39,8 +41,7 @@ const { id } = useParams<{ id: string }>();
     try {
       setLoading(true);
       setError("");
-      
-      // Corrected URL: Added '/applications' to match backend route structure
+  
       const response = await axios.post(
         `https://rf-backend-alpha.vercel.app/api/applications/project/apply/${id}`,
         {},
@@ -52,7 +53,7 @@ const { id } = useParams<{ id: string }>();
       );
   
       if (response.status === 201) {
-        router.push(`/admin/USER/others-pages/blank`);
+        router.push(`/admin/USER/others-pages/applications/${response.data.application.id}`);
       }
     } catch (error: any) {
       console.error("Application failed:", error);
