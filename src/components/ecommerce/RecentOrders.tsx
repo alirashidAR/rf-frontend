@@ -66,6 +66,14 @@ export default function RecentOrders() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -136,7 +144,7 @@ export default function RecentOrders() {
                     </span>
                   </TableCell>
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                    {new Date(project.updatedAt).toLocaleDateString()}
+                    {formatDate(project.updatedAt)}
                   </TableCell>
                   {role === 'FACULTY' ? (
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 text-center w-[120px]">
@@ -153,7 +161,7 @@ export default function RecentOrders() {
                   )}
                   <TableCell className="py-3 text-end pr-12">
                     <Badge size="sm" color={statusColor(project.status)}>
-                      {project.status.charAt(0) + project.status.slice(1).toLowerCase()}
+                      {project.status}
                     </Badge>
                   </TableCell>
                 </TableRow>

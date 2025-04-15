@@ -52,7 +52,7 @@ const { id } = useParams<{ id: string }>();
       );
   
       if (response.status === 201) {
-        router.push(`/admin/USER/others-pages/applications/${response.data.application.id}`);
+        router.push(`/admin/USER/others-pages/blank`);
       }
     } catch (error: any) {
       console.error("Application failed:", error);

@@ -18,8 +18,40 @@ interface Application {
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
 }
+interface Faculty {
+  user: User;
+}
+
+interface Participant {
+  user: User;
+}
+
+interface ProjectCount {
+  applications: number;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  status: string;
+  startDate?: string;
+  endDate?: string;
+  applicationDeadline?: string;
+  location: string;
+  positionsAvailable: number;
+  requirements: string[];
+  keywords: string[];
+  faculty: Faculty;
+  participants: Participant[];
+  applications: any[];
+  isFavorite: boolean;
+  _count?: ProjectCount;
+}
 
 export default function ApplicationsPage() {
+  const [project, setProject] = useState<Project | null>(null);
   const router = useRouter();
   const id =
     typeof window !== "undefined"
@@ -60,8 +92,8 @@ export default function ApplicationsPage() {
   ) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        `https://rf-backend-alpha.vercel.app/api/${applicationId}/status`,
+      await axios.put(
+        `https://rf-backend-alpha.vercel.app/api/applications/${applicationId}/status`,
         { status },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -72,16 +104,28 @@ export default function ApplicationsPage() {
           app.id === applicationId ? { ...app, status } : app
         )
       );
+
+      if (status === "ACCEPTED") {
+        const response = await axios.get(`https://rf-backend-alpha.vercel.app/api/projects/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        setProject(response.data);
+      }
+
+      
     } catch (err) {
       console.error(`Error updating status to ${status}:`, err);
     }
   };
 
-  const handleAccept = (applicationId: string) =>
-    updateStatus(applicationId, "ACCEPTED");
+  // const handleAccept = (applicationId: string) =>
+  //   updateStatus(applicationId, "ACCEPTED");
 
-  const handleReject = (applicationId: string) =>
-    updateStatus(applicationId, "REJECTED");
+  // const handleReject = (applicationId: string) =>
+  //   updateStatus(applicationId, "REJECTED");
 
   const handleViewProfile = (userId: string) => {
     router.push(`/admin/USER/others-pages/profile/${userId}`);
@@ -149,13 +193,13 @@ export default function ApplicationsPage() {
                 {app.status === "PENDING" && (
                   <>
                     <button
-                      onClick={() => handleAccept(app.id)}
+                      onClick={() => updateStatus(app.id,"ACCEPTED")}
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded text-sm"
                     >
                       Accept
                     </button>
                     <button
-                      onClick={() => handleReject(app.id)}
+                      onClick={() => updateStatus(app.id,"REJECTED")}
                       className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded text-sm"
                     >
                       Reject
