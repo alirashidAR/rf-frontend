@@ -14,11 +14,18 @@ const Header = () => (
         <a href="#testimonials" className="text-gray-600 hover:text-blue-600">Testimonials</a>
         <a href="#contact" className="text-gray-600 hover:text-blue-600">Contact</a>
       </nav>
-      <Link href="auth/signup">
-        <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition">
+      <div className="flex items-center gap-2">
+        <Link href="auth/signin">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition border border-blue-600">
+            Login
+          </button>
+        </Link>
+        <Link href="auth/signup">
+          <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-50 transition">
             Start Journey →
-        </button>
-      </Link>
+          </button>
+        </Link>
+      </div>
 
     </div>
   </header>
