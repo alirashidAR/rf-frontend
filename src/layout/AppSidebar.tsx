@@ -106,12 +106,7 @@ const AppSidebar: React.FC = () => {
       name: "My Projects",
       icon: <PageIcon />,
       path: `/admin/${role}/others-pages/blank`,
-    },
-    {
-      name: "Error page",
-      icon: <PageIcon />,
-      path: "/error-404",
-    },
+    }
   ];
 
   const renderMenuItems = (
