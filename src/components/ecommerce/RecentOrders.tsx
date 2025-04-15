@@ -3,51 +3,66 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import { useAuth } from "@/context/AuthContext"; // Import your auth context
 
-interface FacultyProject {
+interface ProjectData {
   id: string;
   title: string;
   updatedAt: string;
-  status: "ONGOING" | "COMPLETED" | "PENDING";
-  pendingApplications: number;
+  status: "ONGOING" | "COMPLETED" | "PENDING" | "ACCEPTED" | "REJECTED";
+  pendingApplications?: number;
+  applicationStatus?: string; // For student view
 }
 
 export default function RecentOrders() {
-  const [projects, setProjects] = useState<FacultyProject[]>([]);
+  const { role } = useAuth(); // Get role from auth context
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFacultyProjects = async () => {
+    const fetchProjects = async () => {
       try {
-        const response = await axios.get(
-          "https://rf-backend-alpha.vercel.app/api/projects/faculty/current",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setProjects(response.data.projects);
+        const endpoint = role === 'FACULTY' 
+          ? "https://rf-backend-alpha.vercel.app/api/projects/faculty/current"
+          : "https://rf-backend-alpha.vercel.app/api/projects/current";
+
+        const response = await axios.get(endpoint, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        // Transform data based on role
+        const transformedData = role === 'FACULTY'
+          ? response.data.projects
+          : response.data.projects.map((p: any) => ({
+              ...p.project,
+              applicationStatus: p.status
+            }));
+
+        setProjects(transformedData);
       } catch (error) {
-        console.error("Error fetching faculty projects:", error);
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFacultyProjects();
-  }, []);
+    fetchProjects();
+  }, [role]);
 
-  const statusColor = (status: FacultyProject["status"]) => {
+  const statusColor = (status: string) => {
     switch (status) {
       case "ONGOING":
+      case "ACCEPTED":
         return "success";
       case "PENDING":
         return "warning";
       case "COMPLETED":
+      case "REJECTED":
         return "error";
       default:
-        return undefined; // or replace with a valid BadgeColor value if applicable
+        return undefined;
     }
   };
 
@@ -76,12 +91,21 @@ export default function RecentOrders() {
               >
                 Last Updated
               </TableCell>
-              <TableCell
-                isHeader
-                className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
-              >
-                Pending Applications
-              </TableCell>
+              {role === 'FACULTY' ? (
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+                >
+                  Pending Applications
+                </TableCell>
+              ) : (
+                <TableCell
+                  isHeader
+                  className="py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400"
+                >
+                  Application Status
+                </TableCell>
+              )}
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-end pr-12 text-theme-xs dark:text-gray-400"
@@ -114,11 +138,19 @@ export default function RecentOrders() {
                   <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                     {new Date(project.updatedAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 text-center w-[120px]">
-                    <Badge size="sm" color="info">
-                      {project.pendingApplications}
-                    </Badge>
-                  </TableCell>
+                  {role === 'FACULTY' ? (
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 text-center w-[120px]">
+                      <Badge size="sm" color="info">
+                        {project.pendingApplications}
+                      </Badge>
+                    </TableCell>
+                  ) : (
+                    <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 text-center w-[120px]">
+                      <Badge size="sm" color={statusColor(project.applicationStatus || '')}>
+                        {(project.applicationStatus || '').charAt(0) + (project.applicationStatus || '').slice(1).toLowerCase()}
+                      </Badge>
+                    </TableCell>
+                  )}
                   <TableCell className="py-3 text-end pr-12">
                     <Badge size="sm" color={statusColor(project.status)}>
                       {project.status.charAt(0) + project.status.slice(1).toLowerCase()}

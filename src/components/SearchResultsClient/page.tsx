@@ -4,8 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 const SearchResults = () => {
+  const {role}=useAuth();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -188,7 +190,7 @@ const SearchResults = () => {
               title={project.title || "Untitled Project"}
               desc={`${project.faculty.user.name || "Unknown"} • ${project.faculty.user.department || "N/A"} Department`}
               className="mt-4 cursor-pointer hover:bg-gray-100"
-              onClick={() => router.push(`/admin/others-pages/projects/${project.id || ""}`)}
+              onClick={() => router.push(`/admin/${role}/others-pages/projects/${project.id || ""}`)}
             >
               <div className="mt-2">
                 {(project.keywords || []).map((tag: string) => (
