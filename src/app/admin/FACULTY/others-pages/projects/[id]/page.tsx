@@ -449,27 +449,33 @@ export default function ProjectPage() {
                       </button>
                       <button 
                         className="border border-red-500 text-red-600 px-4 py-2 rounded hover:bg-red-50 transition w-full"
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-                            // Delete project logic here
-                            const localToken = localStorage.getItem("token");
-                            axios.delete(`https://rf-backend-alpha.vercel.app/api/projects/${id}`, {
-                              headers: {
-                                Authorization: `Bearer ${localToken}`,
-                              },
-                            })
-                            .then(() => {
+                        onClick={async () => {
+                          if (!id || typeof id !== "string") {
+                            alert("Invalid project ID");
+                            return;
+                          }
+                          
+                          if (window.confirm("Are you sure you want to delete this project?")) {
+                            try {
+                              const localToken = localStorage.getItem("token");
+                              if (!localToken) throw new Error("No authentication token");
+
+                              await axios.delete(`https://rf-backend-alpha.vercel.app/api/projects/${id}`, {
+                                headers: { Authorization: `Bearer ${localToken}` }
+                              });
+                              
                               router.push("/admin/FACULTY/others-pages/blank");
-                            })
-                            .catch(err => {
-                              console.error("Error deleting project:", err);
-                              alert("Failed to delete project. Please try again.");
-                            });
+                            } catch (err: any) {
+                              console.error("Delete failed:", err.response?.data || err.message);
+                              alert(err.response?.data?.message || "Deletion failed. Check console for details.");
+                            }
                           }
                         }}
                       >
                         Delete Project
                       </button>
+
+
                     </div>
                   )}
                 </div>
