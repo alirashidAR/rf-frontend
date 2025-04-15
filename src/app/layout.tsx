@@ -1,3 +1,4 @@
+//layout.tsx
 import { Outfit } from "next/font/google";
 import "./globals.css";
 
