@@ -36,9 +36,16 @@ export default function UserMetaCard({ data }: any) {
       if (!token) {
         throw new Error("No token found");
       }
+      
       const decodedToken: any = jwtDecode(token);
+
+      // Check if the user is a faculty or other type of user and set API URL accordingly
+      const apiUrl = decodedToken.facultyId
+        ? `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`
+        : `https://rf-backend-alpha.vercel.app/api/user/`;
+
       const response = await axios.patch(
-        `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
+        apiUrl,
         {
           name: formData.name,
           email: formData.email,
@@ -51,8 +58,11 @@ export default function UserMetaCard({ data }: any) {
           },
         }
       );
+
       console.log("User data updated successfully:", response.data);
       closeModal();
+      
+
     } catch (error) {
       console.error("Error updating user data:", error);
     } finally {

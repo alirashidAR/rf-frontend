@@ -1,5 +1,6 @@
 //UserInfoCard.
 "use client";
+import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -10,6 +11,7 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
 export default function UserInfoCard({ data: initialData }: any) {
+  const pathname = usePathname();
   const { isOpen, openModal, closeModal } = useModal();
   
   // Keep a local copy of data that we can update after successful save
@@ -38,11 +40,9 @@ export default function UserInfoCard({ data: initialData }: any) {
     setIsSaving(true);
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
+      if (!token) throw new Error("No token found");
+
       const decodedToken: any = jwtDecode(token);
-      
       const updatedData = {
         name: formData.name,
         contactInfo: formData.email,
@@ -51,21 +51,31 @@ export default function UserInfoCard({ data: initialData }: any) {
         researchAreas: formData.researchAreas.split(",").map((r: string) => r.trim()),
         officeHours: formData.officeHours,
       };
-      
-      const response = await axios.patch(
-        `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
-      console.log("Saved successfully");
-      
-      // Update the local data state to reflect changes
+
+      if (pathname === "/admin/FACULTY/others-pages/profile") {
+        await axios.patch(
+          `https://rf-backend-alpha.vercel.app/api/faculty/${decodedToken.facultyId}`,
+          updatedData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else if (pathname === "/admin/USER/others-pages/profile") {
+        await axios.patch(
+          `https://rf-backend-alpha.vercel.app/api/user/`,
+          updatedData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+
       const updatedUserData = {
         ...data,
         user: { ...data.user, name: formData.name },
@@ -73,9 +83,9 @@ export default function UserInfoCard({ data: initialData }: any) {
         bio: formData.bio,
         specialization: updatedData.specialization,
         researchAreas: updatedData.researchAreas,
-        officeHours: formData.officeHours
+        officeHours: formData.officeHours,
       };
-      
+
       setData(updatedUserData);
       closeModal();
     } catch (err) {

@@ -70,11 +70,11 @@ const AppSidebar: React.FC = () => {
         { name: "Metrics", path: `/admin/${role}`, pro: false },
       ],
     },
-    {
-      icon: <UserCircleIcon />,
-      name: "Project Page",
-      path: `/admin/${role}/others-pages/projects/1`,
-    },
+    // {
+    //   icon: <UserCircleIcon />,
+    //   name: "Project Page",
+    //   path: `/admin/${role}/others-pages/projects/1`,
+    // },
     {
       icon: <UserCircleIcon />,
       name: "User Profile",
