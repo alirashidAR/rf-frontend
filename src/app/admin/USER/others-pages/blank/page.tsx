@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
-const tabs = ["Active", "Pending", "Completed"];
+const tabs = ["Active", "Pending", "Completed", "Applied Projects"];
 const itemsPerPage = 3;
 
 export default function MyProjectsPage() {
@@ -23,53 +23,77 @@ export default function MyProjectsPage() {
   }
 
   const [projectsData, setProjectsData] = useState<Project[]>([]);
+  const [appliedProjects, setAppliedProjects] = useState<Project[]>([]);
   const [activeTab, setActiveTab] = useState("Active");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       const localToken = localStorage.getItem("token");
+      if (!localToken) return;
 
-      if (localToken) {
-        try {
-          setLoading(true); // Set loading to true before fetch
-          const res = await axios.get("https://rf-backend-alpha.vercel.app/api/projects/user", {
-            headers: {
-              Authorization: `Bearer ${localToken}`,
-            },
-          });
+      try {
+        setLoading(true);
+        
+        // Fetch main projects
+        const projectsRes = await axios.get(
+          "https://rf-backend-alpha.vercel.app/api/projects/user",
+          {
+            headers: { Authorization: `Bearer ${localToken}` },
+          }
+        );
 
-          // Normalize project status
-          const mappedProjects = res.data.map((project: any) => {
-            let normalizedStatus = project.status;
-            if (normalizedStatus === "ONGOING") normalizedStatus = "Active";
-            else normalizedStatus = normalizedStatus.charAt(0) + normalizedStatus.slice(1).toLowerCase();
+        // Fetch applied projects
+        const applicationsRes = await axios.get(
+          "https://rf-backend-alpha.vercel.app/api/applications/student/applications",
+          {
+            headers: { Authorization: `Bearer ${localToken}` },
+          }
+        );
 
-            return {
-              id: project.id,
-              title: project.title,
-              status: normalizedStatus,
-              endDate: project.endDate,
-              keywords: project.keywords,
-            };
-          });
+        // Process main projects
+        const mappedProjects = projectsRes.data.map((project: any) => ({
+          id: project.id,
+          title: project.title,
+          status: project.status === "ONGOING" 
+            ? "Active" 
+            : project.status.charAt(0) + project.status.slice(1).toLowerCase(),
+          endDate: project.endDate,
+          keywords: project.keywords,
+        }));
 
-          setProjectsData(mappedProjects);
-        } catch (err) {
-          console.error("Error fetching user projects:", err);
-        } finally {
-          setLoading(false); // Turn off loading after fetch
-        }
+        // Process applied projects
+        const pendingApps = applicationsRes.data.filter((app: any) => app.status === "PENDING");
+        const mappedAppliedProjects = pendingApps.map((app: any) => ({
+          id: app.project.id,
+          title: app.project.title,
+          status: "Applied",
+          endDate: app.project.endDate,
+          keywords: app.project.keywords,
+        }));
+
+        setProjectsData(mappedProjects);
+        setAppliedProjects(mappedAppliedProjects);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProjects();
+    fetchData();
   }, [role]);
 
-  const filteredProjects = projectsData.filter((proj) => proj.status === activeTab);
+  const filteredProjects = activeTab === "Applied Projects" 
+    ? appliedProjects 
+    : projectsData.filter((proj) => proj.status === activeTab);
+
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-  const displayedProjects = filteredProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const displayedProjects = filteredProjects.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded-lg">
@@ -85,22 +109,32 @@ export default function MyProjectsPage() {
                 setCurrentPage(1);
               }}
               className={`text-lg pb-2 ${
-                activeTab === tab ? "border-b-2 border-blue-500 text-blue-600 font-semibold" : "text-gray-500"
+                activeTab === tab 
+                  ? "border-b-2 border-blue-500 text-blue-600 font-semibold" 
+                  : "text-gray-500"
               }`}
             >
-              {tab} ({projectsData.filter((p) => p.status === tab).length})
+              {tab} (
+                {tab === "Applied Projects" 
+                  ? appliedProjects.length 
+                  : projectsData.filter((p) => p.status === tab).length}
+              )
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-40 text-gray-500 text-lg">Loading projects...</div>
+          <div className="flex justify-center items-center h-40 text-gray-500 text-lg">
+            Loading projects...
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-2 gap-4 mt-4">
               {displayedProjects.map((project) => (
                 <Link
-                  href={`/admin/USER/others-pages/projects/${project.id}`}
+                  href={
+                    `/admin/USER/others-pages/projects/${project.id}`
+                  }
                   key={project.id}
                   className="p-4 bg-gray-100 rounded-lg shadow block hover:bg-gray-200 transition"
                 >
@@ -110,6 +144,8 @@ export default function MyProjectsPage() {
                         ? "bg-green-200 text-green-700"
                         : project.status === "Pending"
                         ? "bg-yellow-200 text-yellow-700"
+                        : project.status === "Applied"
+                        ? "bg-purple-200 text-purple-700"
                         : "bg-gray-300 text-gray-700"
                     }`}
                   >
@@ -134,7 +170,9 @@ export default function MyProjectsPage() {
               <div className="flex justify-center items-center space-x-2 mt-4">
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  className={`px-3 py-1 rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === 1 ? "bg-gray-300" : "bg-blue-500 text-white"
+                  }`}
                 >
                   Prev
                 </button>
@@ -162,14 +200,14 @@ export default function MyProjectsPage() {
           </>
         )}
 
-        <div className="mt-6 flex justify-end">
+        {/* <div className="mt-6 flex justify-end">
           <button
             onClick={() => router.push("/admin/USER/others-pages/forms/form-elements")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
             New Project
           </button>
-        </div>
+        </div> */}
       </ComponentCard>
     </div>
   );
