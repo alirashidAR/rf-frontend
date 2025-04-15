@@ -84,7 +84,7 @@ export default function ApplicationsPage() {
     updateStatus(applicationId, "REJECTED");
 
   const handleViewProfile = (userId: string) => {
-    router.push(`/admin/USER/others-pages/profile/${userId}`);
+    router.push(`/admin/FACULTY/others-pages/profile/${userId}`);
   };
 
   return (
