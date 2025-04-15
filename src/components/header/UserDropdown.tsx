@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { name, role, email, loading } = useAuth();
+  const { name, role, email } = useAuth();
 
   const profilePic = typeof window !== "undefined" 
     ? localStorage.getItem("profilePic") 
@@ -68,7 +68,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       >
         <div>
         <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-          {name || "Loading..."}
+          {(name || (email && email.split("@")[0]) || "User").toUpperCase()}
         </span>
         <div>
          
