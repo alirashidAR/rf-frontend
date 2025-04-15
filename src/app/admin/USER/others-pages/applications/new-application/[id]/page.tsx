@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import ComponentCard from "@/components/common/ComponentCard";
 
-export default function NewApplication({ params }: { params: { id: string } }) {
+export default function NewApplication() {
+const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [project, setProject] = useState<any>(null);
   const [isApplied, setIsApplied] = useState(false);
@@ -15,7 +16,7 @@ export default function NewApplication({ params }: { params: { id: string } }) {
     const fetchProjectDetails = async () => {
       try {
         const response = await axios.get(
-          `https://rf-backend-alpha.vercel.app/api/projects/${params.id}`,
+          `https://rf-backend-alpha.vercel.app/api/projects/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -32,7 +33,7 @@ export default function NewApplication({ params }: { params: { id: string } }) {
     };
 
     fetchProjectDetails();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async () => {
     try {
@@ -41,7 +42,7 @@ export default function NewApplication({ params }: { params: { id: string } }) {
       
       // Corrected URL: Added '/applications' to match backend route structure
       const response = await axios.post(
-        `https://rf-backend-alpha.vercel.app/api/applications/project/apply/${params.id}`,
+        `https://rf-backend-alpha.vercel.app/api/applications/project/apply/${id}`,
         {},
         {
           headers: {

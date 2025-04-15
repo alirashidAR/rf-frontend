@@ -1,3 +1,4 @@
+"use client"
 import GridShape from "@/components/common/GridShape";
 import { useAuth } from "@/context/AuthContext";
 import { Metadata } from "next";
@@ -5,11 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-export const metadata: Metadata = {
-  title: "Error 404",
-  description:
-    "This is Next.js Error 404 page for Research Faculty Finder.",
-};
+// export const metadata: Metadata = {
+//   title: "Error 404",
+//   description:
+//     "This is Next.js Error 404 page for Research Faculty Finder.",
+// };
 
 export default function Error404() {
   const {role}=useAuth();
