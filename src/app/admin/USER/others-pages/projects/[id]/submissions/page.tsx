@@ -163,7 +163,7 @@ const StudentSubmissionsPage = () => {
                     </Tag>
                   }
                   actions={[
-                    <Link href={`/USER/others-pages/projects/${projectId}/submissions/${item.id}`} key="submit">
+                    <Link href={`/admin/USER/others-pages/projects/${projectId}/submissions/${item.id}`} key="submit">
                       <Button type="primary" icon={<FileAddOutlined />}>
                         View & Submit
                       </Button>

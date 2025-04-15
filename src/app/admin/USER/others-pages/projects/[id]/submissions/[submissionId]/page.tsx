@@ -238,7 +238,7 @@ const getCurrentUser = async (): Promise<User> => {
               </p>
               <p>
                 <span className="font-medium">Status:</span>{' '}
-                <span className={mySubmission.status === 'GRADED' ? 'text-green-600' : 'text-blue-600'}>
+                <span className={mySubmission.status === 'SUBMITTED' ? 'text-green-600' : 'text-blue-600'}>
                   {mySubmission.status}
                 </span>
               </p>
@@ -255,15 +255,14 @@ const getCurrentUser = async (): Promise<User> => {
                 </p>
               )}
             </div>
-
-            {mySubmission.status === 'GRADED' && (
+            
               <div className="mt-4">
                 <Divider>Feedback</Divider>
                 <div className="bg-gray-100 p-4 rounded">
                   <p>{mySubmission.feedback || 'No feedback provided yet.'}</p>
                 </div>
               </div>
-            )}
+            
 
             <div className="mt-6">
               <Alert
