@@ -41,7 +41,7 @@ export default function QuickActions() {
         // Filter out projects with status "COMPLETED" and show only the top 3
         const filteredProjects = response.data.projects
           .filter((project: Project) => project.status !== "COMPLETED")
-          .slice(0, 3); // Show only the first 3 projects
+          .slice(0, 2); // Show only the first 3 projects
 
         setProjects(filteredProjects);
       } catch (error) {
