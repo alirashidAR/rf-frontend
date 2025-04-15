@@ -20,7 +20,7 @@ export default function RecentOrders() {
     const fetchFacultyProjects = async () => {
       try {
         const response = await axios.get(
-          "https://rf-backend-alpha.vercel.app/api/projects/faculty/current",
+          "https://rf-backend-alpha.vercel.app/api/projects/current",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -121,7 +121,9 @@ export default function RecentOrders() {
                   </TableCell>
                   <TableCell className="py-3 text-end pr-12">
                     <Badge size="sm" color={statusColor(project.status)}>
-                      {project.status.charAt(0) + project.status.slice(1).toLowerCase()}
+                    {project?.status
+                    ? project.status.charAt(0) + project.status.slice(1).toLowerCase()
+                    : "Unknown"}
                     </Badge>
                   </TableCell>
                 </TableRow>

@@ -55,7 +55,7 @@ export default function SignInForm() {
       );
       const { jwt, role } = response.data; // Get role from backend response
       console.log(`jwt: ${jwt}, role: ${role}`);
-      localStorage.setItem("jwt", jwt);
+      localStorage.setItem("token", jwt);
       const decodedToken: DecodedToken = jwtDecode(jwt);
       console.log("Decoded Token:", decodedToken); // Debugging
 
