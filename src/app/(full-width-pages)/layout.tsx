@@ -1,11 +1,17 @@
-// app/auth/layout.tsx
-import AuthLayout from "../auth/layout";
-import React from "react";
+import { AuthProvider } from "@/context/AuthContext";
+import AuthLayout from "./(auth)/layout";
 
-export default function AuthRouteLayout({
+
+export default function FullWidthPageLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthLayout>{children}</AuthLayout>;
+  return (
+    <AuthProvider>
+      <AuthLayout>
+        <div>{children}</div>
+      </AuthLayout>
+    </AuthProvider>
+  );
 }
