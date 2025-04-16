@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { PlusCircle } from "lucide-react";
 import { Tabs, Button } from 'antd';
 import Link from 'next/link';
+import { jwtDecode } from "jwt-decode";
+
 
 // Define interfaces for proper type checking
 interface User {
@@ -18,6 +20,7 @@ interface User {
 }
 
 interface Faculty {
+  id:string;
   user: User;
 }
 
@@ -69,6 +72,14 @@ export default function ProjectPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
 
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No token found");
+  }
+  const decodedToken: any = jwtDecode(token);
+  const facultyId = decodedToken.facultyId;
+  console.log(decodedToken);
+
   useEffect(() => {
     const fetchProjectDetails = async () => {
       if (!id) return;
@@ -99,6 +110,13 @@ export default function ProjectPage() {
 
     fetchProjectDetails();
   }, [id, router]);
+
+  useEffect(() => {
+    if (project) {
+      console.log("Auth Faculty ID:", facultyId);
+      console.log("Project Faculty ID:", project.faculty.id);
+    }
+  }, [project]);
 
   const fetchApplications = async () => {
     const localToken = localStorage.getItem("token");
@@ -274,6 +292,8 @@ export default function ProjectPage() {
     );
   }
 
+  const isFacultyLead = role === "FACULTY" && facultyId === project.faculty.id;
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       {/* Header Section */}
@@ -326,7 +346,8 @@ export default function ProjectPage() {
             </button>
           )}
 
-          {role === "FACULTY" && (
+          {isFacultyLead && (
+            
             <button 
               className="border px-4 py-2 rounded hover:bg-gray-100 transition text-gray-500"
               onClick={() => router.push(`/admin/FACULTY/others-pages/forms/form-elements?editId=${project.id}`)}
@@ -439,7 +460,7 @@ export default function ProjectPage() {
                   </aside>
 
                   {/* Action Buttons for Faculty */}
-                  {role === "FACULTY" && (
+                  {isFacultyLead && (
                     <div className="flex flex-col gap-3">
                       <button 
                         className="border border-blue-500 text-blue-600 px-4 py-2 rounded hover:bg-blue-50 transition w-full"

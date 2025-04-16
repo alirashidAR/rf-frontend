@@ -65,7 +65,7 @@ export default function SignInForm() {
       setName(decodedToken.name);
       
       if (role === "FACULTY") {
-        window.location.href = "/admin/faculty";
+        window.location.href = "/admin/FACULTY";
         localStorage.setItem("facultyId", response.data.facultyId);
       } else {
         window.location.href = "/admin/USER";

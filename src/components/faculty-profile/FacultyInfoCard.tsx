@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "../form/input/InputField";
+import Link from "next/link";
 
 export default function FacultyListPage({ data }: any) {
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
@@ -32,16 +33,7 @@ export default function FacultyListPage({ data }: any) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
-        Faculty Members
-      </h2>
 
-      <Input
-        placeholder="Search by name, specialization, or research area..."
-        className="mb-6"
-        defaultValue={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
 
       <div className="space-y-4">
         {filteredFaculty.map((faculty:any) => (
@@ -63,9 +55,13 @@ export default function FacultyListPage({ data }: any) {
               <strong>Research Areas:</strong>{" "}
               {faculty.researchAreas?.join(", ") || "N/A"}
             </p>
-            <Button size="sm" className="mt-3" onClick={() => openModal(faculty)}>
-              View Details
-            </Button>
+            <Link href={`/admin/FACULTY/others-pages/faculty-detail/${faculty.id}`}>
+              <button
+                className="text-sm mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                View Details
+              </button>
+            </Link>
           </div>
         ))}
       </div>

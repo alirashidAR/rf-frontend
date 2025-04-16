@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
-const tabs = ["Active", "Pending", "Completed", "Applied Projects"];
-const itemsPerPage = 3;
+const tabs = ["Applied Projects", "Active", "Pending", "Completed"];
+const itemsPerPage = 4;
 
 export default function MyProjectsPage() {
   const { role } = useAuth();
@@ -24,7 +24,7 @@ export default function MyProjectsPage() {
 
   const [projectsData, setProjectsData] = useState<Project[]>([]);
   const [appliedProjects, setAppliedProjects] = useState<Project[]>([]);
-  const [activeTab, setActiveTab] = useState("Active");
+  const [activeTab, setActiveTab] = useState("Applied Projects");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
