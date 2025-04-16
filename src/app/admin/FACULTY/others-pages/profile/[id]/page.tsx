@@ -14,17 +14,21 @@ interface Project {
 }
 
 interface ProfileData {
-    name: string;
-    email: string;
-    profilePicUrl: string;
-    department: string;
-    researchAreas: string[];
     user: {
-        bio: string;
         name: string;
         email: string;
+        profilePicUrl: string;
+        bio: string;
+        department: string;
+        researchInterests: string[];
+        location: string;
+        phone: string;
         projectsParticipated: { project: Project }[];
     };
+    contactInfo: string;
+    researchAreas: string[];
+    phone: string;
+    location: string;
 }
 
 export default function UserProfile() {
@@ -74,24 +78,25 @@ export default function UserProfile() {
             {/* Profile Card */}
             <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md mt-6">
                 <div className="flex flex-col sm:flex-row items-center gap-4">
-                    {profileData?.profilePicUrl ? (
+                    {profileData?.user.profilePicUrl ? (
                         <img
-                            src={profileData.profilePicUrl}
-                            alt={profileData.name}
+                            src={profileData.user.profilePicUrl}
+                            alt={profileData.user.name}
                             className="w-20 h-20 rounded-full object-cover"
                         />
                     ) : (
                         <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                            {profileData?.name?.charAt(0) || "N"}
+                            {profileData?.user.name?.charAt(0) || "N"}
                         </div>
                     )}
                     <div className="text-center sm:text-left">
                         <h1 className="text-2xl font-bold">{profileData?.user.name}</h1>
-                        <p className="text-gray-600">{profileData?.user.email}</p>
-                        <a href={`mailto:${profileData?.email}`} className="text-blue-600 break-all">
-                            {profileData?.email}
+                        <p className="text-gray-600">{profileData?.user.department}</p>
+                        <a href={`mailto:${profileData?.contactInfo}`} className="text-blue-600 break-all">
+                            {profileData?.contactInfo}
                         </a>
-                        <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-2">
+                        <p className="mt-2 text-gray-600">{profileData?.user.bio}</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
                             {profileData?.researchAreas.map((interest, index) => (
                                 <span key={index} className="bg-blue-100 text-blue-600 px-3 py-1 text-sm rounded-full">
                                     {interest}
@@ -105,52 +110,42 @@ export default function UserProfile() {
             {/* Projects Section */}
             <div className="max-w-4xl mx-auto mt-6">
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-semibold">Current Projects</h2>
-                        {projects.length > 1 && (
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="text-blue-600 text-sm underline"
-                            >
-                                View All
-                            </button>
-                        )}
-                    </div>
-
+                    <h2 className="text-lg font-semibold">Research Projects</h2>
                     {projects.length > 0 ? (
-                        <div className="mt-4">
-                            <p className="font-semibold">{projects[0].project.title}</p>
-                            <p className="text-gray-600 text-sm">{projects[0].project.description}</p>
-                            <span className="bg-green-100 text-green-600 px-2 py-1 text-xs rounded-full mt-2 inline-block">
-                                Active
-                            </span>
+                        <div className="mt-4 space-y-4">
+                            {projects.map((projectData, index) => (
+                                <div key={index} className="border-l-4 border-blue-500 pl-4">
+                                    <h3 className="font-semibold">{projectData.project.title}</h3>
+                                    <p className="text-gray-600 text-sm mt-1">{projectData.project.description}</p>
+                                </div>
+                            ))}
                         </div>
                     ) : (
-                        <p className="text-gray-600 mt-2">No projects available.</p>
+                        <p className="text-gray-600 mt-2">No current projects</p>
                     )}
                 </div>
             </div>
 
-            {/* Education & Research */}
+            {/* Contact Information */}
             <div className="max-w-4xl mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-lg font-semibold">Education</h2>
-                    <p className="text-gray-600 mt-2"><strong>Ph.D. in Computer Science</strong> - Stanford University</p>
-                    <p className="text-gray-600 mt-2"><strong>M.S. in Artificial Intelligence</strong> - MIT</p>
-                    <p className="text-gray-600 mt-2"><strong>B.S. in Computer Science</strong> - UC Berkeley</p>
+                    <h2 className="text-lg font-semibold">Contact Information</h2>
+                    <div className="mt-2 space-y-2">
+                        <p><strong>Phone:</strong> {profileData?.phone || 'N/A'}</p>
+                        <p><strong>Location:</strong> {profileData?.location || 'N/A'}</p>
+                    </div>
                 </div>
 
+                {/* Research Interests */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-lg font-semibold">Research Interests</h2>
-                    <ul className="list-disc pl-5 text-gray-600 mt-2">
-                        {profileData?.researchAreas.length ? (
-                            profileData.researchAreas.map((interest, index) => (
-                                <li key={index}>{interest}</li>
-                            ))
-                        ) : (
-                            <li>No research interests listed.</li>
-                        )}
-                    </ul>
+                    {(profileData?.researchAreas ?? []).length > 0 ? (
+                        profileData?.researchAreas?.map((interest, index) => (
+                            <p key={index} className="text-gray-600">{interest}</p>
+                        ))
+                    ) : (
+                        <p>No research interests listed.</p>
+                    )}
                 </div>
             </div>
 

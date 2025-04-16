@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "../form/input/InputField";
+import Link from "next/link";
 
 export default function FacultyListPage({ data }: any) {
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
@@ -63,9 +64,13 @@ export default function FacultyListPage({ data }: any) {
               <strong>Research Areas:</strong>{" "}
               {faculty.researchAreas?.join(", ") || "N/A"}
             </p>
-            <Button size="sm" className="mt-3" onClick={() => openModal(faculty)}>
-              View Details
-            </Button>
+            <Link href={`/admin/FACULTY/others-pages/faculty-detail/${faculty.id}`}>
+              <button
+                className="text-sm mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                View Details
+              </button>
+            </Link>
           </div>
         ))}
       </div>
