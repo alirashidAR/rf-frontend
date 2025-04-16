@@ -7,43 +7,29 @@ import DemographicCard from "@/components/ecommerce/DemographicCard";
 import QuickActions from "@/components/ecommerce/QuickActions";
 
 export const metadata: Metadata = {
-  title:
-    "Research Faculty Finder",
+  title: "Research Faculty Finder",
   description: "Research Faculty Finder",
 };
 
 export default function Ecommerce() {
   return (
-    
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
-      <div className="col-span-12 space-y-6">
-        student
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      {/* Full-width metrics */}
+      <div className="col-span-1 xl:col-span-12">
         <EcommerceMetrics />
-
-        {/* <MonthlySalesChart /> */}
       </div>
 
-      <div className="col-span-12 xl:col-span-7">
+      {/* Left column */}
+      <div className="col-span-1 xl:col-span-7 flex flex-col gap-6">
         <RecentOrders />
-      </div>
-
-      <div className="col-span-12 xl:col-span-5">
-        <DemographicCard />
-      </div>
-
-
-      <div className="col-span-12 xl:col-span-7">
         <StatisticsChart />
-
       </div>
 
-      <div className="col-span-12 xl:col-span-5">
+      {/* Right column */}
+      <div className="col-span-1 xl:col-span-5 flex flex-col gap-6">
+        <DemographicCard />
         <QuickActions />
       </div>
-
-      
-
-      
     </div>
   );
 }

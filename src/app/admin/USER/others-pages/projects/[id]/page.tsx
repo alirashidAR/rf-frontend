@@ -69,6 +69,9 @@ export default function ProjectPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
 
+  const [applicationStatus, setApplicationStatus] = useState<'PENDING' | 'ACCEPTED' | 'REJECTED' | null>(null);
+  const [loadingApplicationStatus, setLoadingApplicationStatus] = useState(false);
+
   useEffect(() => {
     const fetchProjectDetails = async () => {
       if (!id) return;
@@ -99,6 +102,34 @@ export default function ProjectPage() {
 
     fetchProjectDetails();
   }, [id, router]);
+
+  useEffect(() => {
+    const fetchApplicationStatus = async () => {
+      if (role === "USER" && project?.applications.length) {
+        try {
+          setLoadingApplicationStatus(true);
+          const localToken = localStorage.getItem("token");
+          const response = await axios.get(
+            "https://rf-backend-alpha.vercel.app/api/applications/student/applications",
+            {
+              headers: { Authorization: `Bearer ${localToken}` },
+            }
+          );
+
+          const currentApp = response.data.find(
+            (app: Application) => app.projectId === id
+          );
+          setApplicationStatus(currentApp?.status || null);
+        } catch (err) {
+          console.error("Error fetching application status:", err);
+        } finally {
+          setLoadingApplicationStatus(false);
+        }
+      }
+    };
+
+    fetchApplicationStatus();
+  }, [id, role, project?.applications.length]);
 
   const fetchApplications = async () => {
     const localToken = localStorage.getItem("token");
@@ -319,10 +350,24 @@ export default function ProjectPage() {
           {/* If user already applied */}
           {role !== "FACULTY" && project.applications.length > 0 && (
             <button 
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-not-allowed"
+              className={`px-4 py-2 rounded ${
+                applicationStatus === 'ACCEPTED' 
+                  ? 'bg-green-100 text-green-700 cursor-default'
+                  : applicationStatus === 'REJECTED' 
+                  ? 'bg-red-100 text-red-700 cursor-default'
+                  : applicationStatus === 'PENDING'
+                  ? 'bg-yellow-100 text-yellow-700 cursor-default'
+                  : 'bg-gray-300 text-gray-700 cursor-not-allowed'
+              }`}
               disabled
             >
-              Already Applied
+              {loadingApplicationStatus ? (
+                'Loading Status...'
+              ) : applicationStatus ? (
+                applicationStatus.charAt(0) + applicationStatus.slice(1).toLowerCase()
+              ) : (
+                'Already Applied'
+              )}
             </button>
           )}
 

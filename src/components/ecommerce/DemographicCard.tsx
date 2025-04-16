@@ -40,7 +40,7 @@ export default function TrendingProjects() {
 
         const filteredProjects = response.data.projects
           .filter((project: Project) => project.status !== "COMPLETED")
-          .slice(0, 2); // show only top 3
+          .slice(0, 9); // show only top 3
 
         setProjects(filteredProjects);
       } catch (error) {
