@@ -26,11 +26,23 @@ const chatGroups: ChatGroup[] = [
   { id: 4, name: 'Alumni', lastMessage: 'Thanks!', time: 'Yesterday' },
 ];
 
-export default function MessagesPage({ params }: { params: { role: string } }) {
+interface PageProps {
+  params: Promise<{ role: string }>;
+}
+
+export default function MessagesPage({ params }: PageProps) {
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [search, setSearch] = useState('');
+
+  // Resolve params promise (client-side handling)
+  const [resolvedParams, setResolvedParams] = useState<{ role: string } | null>(null);
+  
+  // Resolve params when component mounts
+  useState(() => {
+    params.then(p => setResolvedParams(p));
+  });
 
   // Load messages based on selected chat (static for now)
   const loadMessages = (chatId: number) => {
@@ -78,10 +90,11 @@ export default function MessagesPage({ params }: { params: { role: string } }) {
     group.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Handler for creating a new chat (placeholder)
   const handleCreateChat = () => {
     alert('Create new chat (functionality to be implemented)');
   };
+
+  if (!resolvedParams) return <div>Loading...</div>;
 
   return (
     <div className="flex h-screen bg-background p-4 space-x-4">

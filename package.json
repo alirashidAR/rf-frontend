@@ -17,6 +17,8 @@
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
     "@headlessui/react": "^2.2.1",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.0",
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@react-oauth/google": "^0.12.1",
