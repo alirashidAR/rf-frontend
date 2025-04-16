@@ -28,6 +28,7 @@ interface Participant {
 interface Application {
   id: string;
   user: User;
+  projectId: string; // Added projectId property
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
 }
