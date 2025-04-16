@@ -21,7 +21,7 @@ interface Project {
   type: string;
 }
 
-export default function TrendingProjects() {
+export default function DemographicCard() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +40,7 @@ export default function TrendingProjects() {
 
         const filteredProjects = response.data.projects
           .filter((project: Project) => project.status !== "COMPLETED")
-          .slice(0, 9); // show only top 3
-
+          .slice(0, 9); 
         setProjects(filteredProjects);
       } catch (error) {
         console.error("Error fetching trending projects:", error);
@@ -91,7 +90,14 @@ export default function TrendingProjects() {
           <p className="text-gray-500">No trending projects found</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        // SCROLLABLE CONTAINER: Only 2 cards visible, rest scrollable
+        <div
+          className="space-y-4"
+          style={{
+            maxHeight: "220px", // Adjust this value to fit exactly 2 cards
+            overflowY: "auto",
+          }}
+        >
           {projects.map((project) => (
             <div
               key={project.id}
@@ -106,7 +112,7 @@ export default function TrendingProjects() {
                     {project.title}
                   </h4>
                   <p className="text-sm text-gray-500 mt-1">
-                    {project.faculty?.user?.name || "Unknown Faculty"} •{" "}
+                    {project.faculty?.user?.name || "Unknown Faculty"} &bull;{" "}
                     {formatDate(project.createdAt)}
                   </p>
                 </div>
