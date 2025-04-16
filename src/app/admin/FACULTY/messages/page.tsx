@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input/input';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Paperclip, Mic, StopCircle } from 'lucide-react';
 
 interface Message {
   id: number;
@@ -35,14 +35,10 @@ export default function MessagesPage({ params }: PageProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [search, setSearch] = useState('');
-
-  // Resolve params promise (client-side handling)
-  const [resolvedParams, setResolvedParams] = useState<{ role: string } | null>(null);
-  
-  // Resolve params when component mounts
-  useState(() => {
-    params.then(p => setResolvedParams(p));
-  });
+  const [recording, setRecording] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load messages based on selected chat (static for now)
   const loadMessages = (chatId: number) => {
@@ -73,16 +69,30 @@ export default function MessagesPage({ params }: PageProps) {
   };
 
   const sendMessage = () => {
-    if (!input.trim() || !selectedChatId) return;
+    if ((!input.trim() && !selectedFile) || !selectedChatId) return;
 
-    const newMsg: Message = {
-      id: Date.now(),
-      sender: 'You',
-      text: input,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-    setMessages((prev) => [...prev, newMsg]);
-    setInput('');
+    if (input.trim()) {
+      const newMsg: Message = {
+        id: Date.now(),
+        sender: 'You',
+        text: input,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      setInput('');
+    }
+
+    if (selectedFile) {
+      // For demo: just show file name as a message
+      const newMsg: Message = {
+        id: Date.now() + 1,
+        sender: 'You',
+        text: `[File] ${selectedFile.name}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, newMsg]);
+      setSelectedFile(null);
+    }
   };
 
   // Filter chat groups based on search
@@ -90,14 +100,43 @@ export default function MessagesPage({ params }: PageProps) {
     group.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Handler for creating a new chat (placeholder)
   const handleCreateChat = () => {
     alert('Create new chat (functionality to be implemented)');
   };
 
-  if (!resolvedParams) return <div>Loading...</div>;
+  // File attachment handler
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  // Voice recording handlers
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder.current = new MediaRecorder(stream);
+      mediaRecorder.current.start();
+      setRecording(true);
+
+      mediaRecorder.current.ondataavailable = (e) => {
+        // For demo: log the blob
+        console.log('Audio blob:', e.data);
+        // You can upload or process the audio blob here
+      };
+    } catch (err) {
+      alert('Microphone access denied or not supported.');
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorder.current?.stop();
+    setRecording(false);
+  };
 
   return (
-    <div className="flex h-screen bg-background p-4 space-x-4">
+    <div className="flex h-screen bg-background space-x-3">
       {/* Sidebar with chat groups */}
       <div className="w-1/4 bg-background rounded-lg shadow-lg overflow-y-auto max-h-full flex flex-col">
         {/* Search and + icon */}
@@ -144,21 +183,19 @@ export default function MessagesPage({ params }: PageProps) {
 
       {/* Main chat area */}
       <div className="flex-1 bg-card rounded-lg shadow-lg flex flex-col">
-      {selectedChatId && (
-        <div className="flex items-center gap-4 border-b border-border px-6 py-4">
-        {/* Optionally add an avatar/icon here */}
-        <div>
-            <div className="font-bold text-lg">
-            {chatGroups.find(g => g.id === selectedChatId)?.name}
+        {/* Chat header */}
+        {selectedChatId && (
+          <div className="flex items-center gap-4 border-b border-border px-6 py-4">
+            <div>
+              <div className="font-bold text-lg">
+                {chatGroups.find(g => g.id === selectedChatId)?.name}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Group chat
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-            {/* You can add more info here, e.g., "Group chat" or participant count */}
-            Group chat
-            </div>
-        </div>
-        {/* Optionally, add actions (call, info, etc.) on the right */}
-        </div>
-    )}
+          </div>
+        )}
 
         {/* Chat messages */}
         <div className="flex-1 p-4 overflow-y-auto">
@@ -188,15 +225,58 @@ export default function MessagesPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Input box */}
-        <div className="p-4 flex gap-2 border-t border-border">
+        {/* Input box with attach, voice, and send */}
+        <div className="p-4 flex items-center gap-2 border-t border-border">
+          {/* File Attachment */}
+          
+
+          {/* Message Input */}
           <Input
-            placeholder="Type a message..."
             value={input}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && sendMessage()}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1"
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
           />
-          <Button onClick={sendMessage}>Send</Button>
+
+          {/* File preview */}
+          {selectedFile && (
+            <span className="text-xs text-muted-foreground ml-2 truncate max-w-[100px]">
+              {selectedFile.name}
+            </span>
+          )}
+
+<Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Paperclip className="h-5 w-5" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+
+          {/* Voice Recording */}
+          <Button
+            variant={recording ? "destructive" : "ghost"}
+            size="icon"
+            onClick={recording ? stopRecording : startRecording}
+          >
+            {recording ? (
+              <StopCircle className="h-5 w-5" />
+            ) : (
+              <Mic className="h-5 w-5" />
+            )}
+          </Button>
+
+          {/* Send Button */}
+          <Button onClick={sendMessage}>
+            Send
+          </Button>
         </div>
       </div>
     </div>
