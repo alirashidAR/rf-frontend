@@ -67,7 +67,7 @@ const AppSidebar: React.FC = () => {
       icon: <GridIcon />,
       name: "Dashboard",
       subItems: [{ name: "Portal", path: `/admin/${role}`, pro: false },
-        // { name: "Metrics", path: `/admin/${role}`, pro: false },
+        { name: "Metrics", path: `/admin/USER/others-pages/metrics`, pro: false },
       ],
     },
     // {
