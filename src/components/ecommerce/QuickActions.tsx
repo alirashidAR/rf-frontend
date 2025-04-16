@@ -38,10 +38,9 @@ export default function QuickActions() {
           }
         );
 
-        // Filter out projects with status "COMPLETED" and show only the top 3
+        // Filter out projects with status "COMPLETED"
         const filteredProjects = response.data.projects
-          .filter((project: Project) => project.status !== "COMPLETED")
-          .slice(0, 2); // Show only the first 3 projects
+          .filter((project: Project) => project.status !== "COMPLETED");
 
         setProjects(filteredProjects);
       } catch (error) {
@@ -92,7 +91,14 @@ export default function QuickActions() {
           <p className="text-gray-500">No recent projects found</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        // SCROLLABLE CONTAINER: Only 2 cards visible, rest scrollable
+        <div
+          className="space-y-4"
+          style={{
+            maxHeight: "220px", // Adjust this value to fit exactly 2 cards
+            overflowY: "auto",
+          }}
+        >
           {projects.map((project) => (
             <div
               key={project.id}
@@ -107,7 +113,7 @@ export default function QuickActions() {
                     {project.title}
                   </h4>
                   <p className="text-sm text-gray-500 mt-1">
-                    {project.faculty?.user?.name || "Unknown Faculty"} •{" "}
+                    {project.faculty?.user?.name || "Unknown Faculty"} &bull;{" "}
                     {formatDate(project.createdAt)}
                   </p>
                 </div>

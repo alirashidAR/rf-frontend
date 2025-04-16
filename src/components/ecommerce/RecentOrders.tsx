@@ -10,9 +10,9 @@ interface ProjectData {
   id: string;
   title: string;
   updatedAt: string;
-  status: "ONGOING" | "COMPLETED" | "PENDING" | "ACCEPTED" | "REJECTED";
+  status: "ONGOING" | "COMPLETED" | "PENDING"; // Project status only
   pendingApplications?: number;
-  applicationStatus?: string;
+  applicationStatus?: "PENDING" | "ACCEPTED" | "REJECTED"; // Separate application status
 }
 
 export default function RecentOrders() {
@@ -48,6 +48,9 @@ export default function RecentOrders() {
         }
 
         setProjects(transformedData);
+
+        console.log('Received projects:', transformedData); // Add this line
+        setProjects(transformedData);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
@@ -75,7 +78,7 @@ export default function RecentOrders() {
 
   const getBasePath = () => {
     if (role === "FACULTY") return "/admin/FACULTY/others-pages/projects";
-    if (role === "USER") return "/admin/USER//others-pages/projects";
+    if (role === "USER") return "/admin/USER/others-pages/projects";
 
   };
 
@@ -165,11 +168,15 @@ export default function RecentOrders() {
                     </TableCell>
                   ) : (
                     <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 text-center w-[120px]">
-                      <Badge size="sm" color={statusColor(project.applicationStatus || "")}>
-                        {(project.applicationStatus || "")
-                          ? (project.applicationStatus ?? "").charAt(0) + (project.applicationStatus ?? "").slice(1).toLowerCase()
-                          : ""}
-                      </Badge>
+                      {project.applicationStatus && (
+                        <Badge 
+                          size="sm" 
+                          color={statusColor(project.applicationStatus)}
+                        >
+                          {project.applicationStatus.charAt(0) + 
+                          project.applicationStatus.slice(1).toLowerCase()}
+                        </Badge>
+                      )}
                     </TableCell>
                   )}
                   <TableCell className="py-3 text-end pr-12">

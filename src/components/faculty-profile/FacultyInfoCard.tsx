@@ -33,16 +33,7 @@ export default function FacultyListPage({ data }: any) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-4">
-        Faculty Members
-      </h2>
 
-      <Input
-        placeholder="Search by name, specialization, or research area..."
-        className="mb-6"
-        defaultValue={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
 
       <div className="space-y-4">
         {filteredFaculty.map((faculty:any) => (

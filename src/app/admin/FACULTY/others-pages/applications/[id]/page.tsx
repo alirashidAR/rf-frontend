@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Modal, Button, message } from "antd";
 
 interface User {
   id: string;
@@ -17,54 +18,29 @@ interface Application {
   user: User;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   createdAt: string;
-}
-interface Faculty {
-  user: User;
-}
-
-interface Participant {
-  user: User;
-}
-
-interface ProjectCount {
-  applications: number;
-}
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  applicationDeadline?: string;
-  location: string;
-  positionsAvailable: number;
-  requirements: string[];
-  keywords: string[];
-  faculty: Faculty;
-  participants: Participant[];
-  applications: any[];
-  isFavorite: boolean;
-  _count?: ProjectCount;
+  coverLetter: string;  // SOP text
+  resumeUrl: string;    // Resume file URL
 }
 
 export default function ApplicationsPage() {
-  const [project, setProject] = useState<Project | null>(null);
   const router = useRouter();
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Modal state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+
   const id =
     typeof window !== "undefined"
       ? window.location.pathname.split("/").pop()
       : "";
 
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!id) return;
 
     const fetchApplications = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
@@ -78,6 +54,7 @@ export default function ApplicationsPage() {
         setApplications(response.data);
       } catch (err) {
         console.error("Error fetching applications:", err);
+        message.error("Failed to load applications");
       } finally {
         setLoading(false);
       }
@@ -104,38 +81,30 @@ export default function ApplicationsPage() {
           app.id === applicationId ? { ...app, status } : app
         )
       );
-
-      if (status === "ACCEPTED") {
-        const response = await axios.get(`https://rf-backend-alpha.vercel.app/api/projects/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        setProject(response.data);
-      }
-
-      
+      message.success(`Application ${status.toLowerCase()} successfully`);
     } catch (err) {
       console.error(`Error updating status to ${status}:`, err);
+      message.error(`Failed to update status to ${status.toLowerCase()}`);
     }
   };
-
-  // const handleAccept = (applicationId: string) =>
-  //   updateStatus(applicationId, "ACCEPTED");
-
-  // const handleReject = (applicationId: string) =>
-  //   updateStatus(applicationId, "REJECTED");
 
   const handleViewProfile = (userId: string) => {
     router.push(`/admin/FACULTY/others-pages/profile/${userId}`);
   };
 
+  const openApplicationModal = (app: Application) => {
+    setSelectedApplication(app);
+    setModalVisible(true);
+  };
+
+  const closeApplicationModal = () => {
+    setModalVisible(false);
+    setSelectedApplication(null);
+  };
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">
-        Applications
-      </h1>
+      <h1 className="text-2xl font-bold mb-6">Applications</h1>
 
       {loading ? (
         <p className="text-gray-500">Loading applications...</p>
@@ -190,33 +159,85 @@ export default function ApplicationsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
+              <Button
+              size="small"
+                onClick={() => openApplicationModal(app)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded text-sm"
+              >
+                View Application
+              </Button>
+
                 {app.status === "PENDING" && (
                   <>
-                    <button
-                      onClick={() => updateStatus(app.id,"ACCEPTED")}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded text-sm"
+                    <Button
+                    size="small"
+                      onClick={() => updateStatus(app.id, "ACCEPTED")}
+                      style={{ backgroundColor: "#22c55e", color: "white", border: "none" }}
                     >
                       Accept
-                    </button>
-                    <button
-                      onClick={() => updateStatus(app.id,"REJECTED")}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded text-sm"
+                    </Button>
+                    <Button
+                    size="small"
+                      onClick={() => updateStatus(app.id, "REJECTED")}
+                      style={{ backgroundColor: "#facc15", color: "#333", border: "none" }}
                     >
                       Reject
-                    </button>
+                    </Button>
                   </>
                 )}
-                <button
+
+                <Button
+                size="small"
                   onClick={() => handleViewProfile(app.user.id)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded text-sm"
+                  style={{ backgroundColor: "#3b82f6", color: "white", border: "none" }}
                 >
                   View Profile
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Modal for SOP and Resume */}
+      <Modal
+        title={`Application Details - ${selectedApplication?.user.name || ""}`}
+        open={modalVisible}
+        onCancel={closeApplicationModal}
+        footer={null}
+        destroyOnClose
+        width={700}
+      >
+        {selectedApplication && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold mb-2">Statement of Purpose:</h3>
+              <div
+                className="p-4 bg-gray-50 rounded-md whitespace-pre-wrap max-h-60 overflow-auto"
+                style={{ whiteSpace: "pre-wrap" }}
+              >
+                {selectedApplication.coverLetter || "No SOP provided."}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Resume:</h3>
+              {selectedApplication.resumeUrl ? (
+                <a
+                  href={selectedApplication.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  View Resume Document
+                </a>
+              ) : (
+                <p className="text-gray-500">No resume uploaded</p>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
