@@ -21,29 +21,32 @@ export const EcommerceMetrics = () => {
       try {
         setLoading(true);
 
-        // Fetch user's projects
+        // Fetch projects based on role
         const projectsRes = await axios.get(
-          "https://rf-backend-alpha.vercel.app/api/projects/user",
+          role === "FACULTY" 
+            ? "https://rf-backend-alpha.vercel.app/api/projects/faculty"
+            : "https://rf-backend-alpha.vercel.app/api/projects/user",
           {
             headers: { Authorization: `Bearer ${localToken}` },
           }
         );
 
-        // Fetch user's applications
-        const applicationsRes = await axios.get(
-          "https://rf-backend-alpha.vercel.app/api/applications/student/applications",
-          {
-            headers: { Authorization: `Bearer ${localToken}` },
-          }
-        );
-
-        // Count projects by status
+        // Process projects for all roles
         const projects = projectsRes.data;
         setActiveCount(projects.filter((p: any) => p.status === "ONGOING").length);
         setCompletedCount(projects.filter((p: any) => p.status === "COMPLETED").length);
 
-        // Count pending applications
-        setPendingCount(applicationsRes.data.filter((app: any) => app.status === "PENDING").length);
+        // Faculty-specific pending projects count
+        if (role === "FACULTY") {
+          setPendingCount(projects.filter((p: any) => p.status === "PENDING").length);
+        } else {
+          // Student-specific pending applications count
+          const applicationsRes = await axios.get(
+            "https://rf-backend-alpha.vercel.app/api/applications/student/applications",
+            { headers: { Authorization: `Bearer ${localToken}` } }
+          );
+          setPendingCount(applicationsRes.data.filter((app: any) => app.status === "PENDING").length);
+        }
 
       } catch (err) {
         console.error("Error fetching metrics:", err);
@@ -77,9 +80,11 @@ export const EcommerceMetrics = () => {
               </h4>
             </div>
             
-            {/* Pending Applications */}
+            {/* Pending Count */}
             <div className="flex flex-col items-center whitespace-nowrap">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Pending Applications</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {role === "FACULTY" ? "Pending Projects" : "Pending Applications"}
+              </span>
               <h4 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
                 {loading ? "--" : pendingCount}
               </h4>
