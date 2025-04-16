@@ -110,7 +110,7 @@ function BarChartOneWrapper({
 }) {
   const options = {
     chart: {
-      type: "bar" as "bar",
+      type: "bar" as any,
       height: 180,
       toolbar: { show: false },
     },
