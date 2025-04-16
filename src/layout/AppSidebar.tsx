@@ -24,36 +24,7 @@ type NavItem = {
 };
 
 
-const othersItems: NavItem[] = [
-  {
-    icon: <Bell className="w-5 h-5" />,
-    name: "Updates",
-    subItems: [
-      { name: "Notifications", path: "/admin/FACULTY/notifications", pro: false },
-      { name: "Messages", path: "/admin/messages", pro: false },
-    ],
-  },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/ui/badge", pro: false },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Authentication",
-  //   subItems: [
-  //     { name: "Sign In", path: "/", pro: false },
-  //     { name: "Sign Up", path: "/signup", pro: false },
-  //   ],
-  // },
-];
+
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
@@ -61,6 +32,17 @@ const AppSidebar: React.FC = () => {
   const { role } = useAuth();
 
   //const role=typeof window !== 'undefined' ? localStorage.getItem('role')|| "guest" : null;
+
+  const othersItems: NavItem[] = [
+    {
+      icon: <Bell className="w-5 h-5" />,
+      name: "Updates",
+      subItems: [
+        { name: "Notifications", path: "/admin/FACULTY/notifications", pro: false },
+        { name: "Messages", path: `/admin/${role}/messages`, pro: false },
+      ],
+    },
+  ];
 
   const navItems: NavItem[] = [
     {
