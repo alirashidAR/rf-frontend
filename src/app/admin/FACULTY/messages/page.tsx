@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input/input';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/buttons';
 import { Plus, Paperclip, Mic, StopCircle } from 'lucide-react';
 
 interface Message {
