@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Input } from '@/components/ui/input/input';
-import { Button } from '@/components/ui/buttons';
+import { Buttons } from '@/components/ui/buttons';
 import { Plus, Paperclip, Mic, StopCircle } from 'lucide-react';
 
 interface Message {
@@ -147,7 +147,7 @@ export default function MessagesPage({ params }: PageProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
             className="flex-1"
           />
-          <Button
+          <Buttons
             variant="outline"
             size="icon"
             onClick={handleCreateChat}
@@ -155,7 +155,7 @@ export default function MessagesPage({ params }: PageProps) {
             className="ml-2"
           >
             <Plus className="w-5 h-5" />
-          </Button>
+          </Buttons>
         </div>
         {/* Chat list */}
         <div className="flex-1 flex flex-col gap-1 px-2 pb-2">
@@ -246,7 +246,7 @@ export default function MessagesPage({ params }: PageProps) {
             </span>
           )}
 
-<Button
+<Buttons
             variant="ghost"
             size="icon"
             onClick={() => fileInputRef.current?.click()}
@@ -258,10 +258,10 @@ export default function MessagesPage({ params }: PageProps) {
               hidden
               onChange={handleFileChange}
             />
-          </Button>
+          </Buttons>
 
           {/* Voice Recording */}
-          <Button
+          <Buttons
             variant={recording ? "destructive" : "ghost"}
             size="icon"
             onClick={recording ? stopRecording : startRecording}
@@ -271,12 +271,12 @@ export default function MessagesPage({ params }: PageProps) {
             ) : (
               <Mic className="h-5 w-5" />
             )}
-          </Button>
+          </Buttons>
 
           {/* Send Button */}
-          <Button onClick={sendMessage}>
+          <Buttons onClick={sendMessage}>
             Send
-          </Button>
+          </Buttons>
         </div>
       </div>
     </div>
