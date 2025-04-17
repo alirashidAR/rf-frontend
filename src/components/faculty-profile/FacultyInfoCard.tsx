@@ -2,7 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/modal";
-import Button from "@/components/ui/button/Button";
+import Button from "../../components/ui/button/Button";
 import Input from "../form/input/InputField";
 import Link from "next/link";
 

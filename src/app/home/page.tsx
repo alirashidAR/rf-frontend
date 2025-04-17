@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Button from '@/components/ui/button/Button';
+import Button from "../../components/ui/button/Button";
 import { UserCheck, Clock, ShieldCheck, BarChart3 } from 'lucide-react';
 
 const Header = () => (
