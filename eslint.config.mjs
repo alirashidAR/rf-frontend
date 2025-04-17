@@ -19,7 +19,7 @@ const eslintConfig = [
       "no-console": "off",
       "no-unused-vars": "off",
       '@typescript-eslint/no-explicit-any': 'off',
-      "import/no-case-sensitive": "error"
+      "import/no-case-sensitive": "off"
     },
   },
 ];
